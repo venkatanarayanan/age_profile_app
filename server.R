@@ -61,6 +61,23 @@ function(input, output) {
     
   })
   
+  
+  output$attributeSelector <-  renderUI({
+    
+    if(length(input$plotOption > 1) && input$plotOption == "Forwards Profile"){
+    
+      selectInput(
+        inputId = "attributeOption",
+        label = "Select the attribute: ",
+        choices = c("Team Leaders","Goal contributions"),
+        selected = TRUE
+      )  
+      
+    }
+  })
+  
+  
+  
   plot <- eventReactive(input$showPlot, {
 
     if(input$plotOption == "Squad Profile"){
@@ -131,7 +148,7 @@ function(input, output) {
                                           size = 10))
     }
     
-    else if(input$plotOption == "Forwards Profile") {
+    else if(input$plotOption == "Forwards Profile" && input$attributeOption == "Team Leaders") {
 
 
       data = big_5_combined %>%
@@ -142,7 +159,8 @@ function(input, output) {
         select(Player, Glsp90, Astp90, npxGp90, xAp90) %>%
         rename(group = Player) %>%
         mutate_at(vars(-group),
-                  funs(rescale))
+                  funs(rescale)) %>%
+        relocate(group, Glsp90, npxGp90)
 
       ggradar(data,
               font.radar = "Georgia",
@@ -163,8 +181,8 @@ function(input, output) {
               axis.label.offset = 1.15,
               gridline.min.colour = "gray22",
               gridline.mid.colour = "gray22",
-              axis.labels = c("Goals p90", "Asts\np90",
-                              "NP xG p90", "xA\np90")) +
+              axis.labels = c("Goals p90","NP\nxG\np90",
+                              "Asts p90","xA\np90")) +
       facet_wrap(~group, ncol = 3) +
       labs(title = paste0("A comparison of the different Forwards - ", input$team),
            subtitle = "( 2020/21 - Minimum 350 minutes )",
@@ -186,58 +204,86 @@ function(input, output) {
 
     }
 
-    # else {
-    # 
-    #   data = big_5_combined %>%
-    #     filter(iconv(Squad, "LATIN1", "ASCII//TRANSLIT") == input$team,
-    #            grepl("FW|MF", Pos),
-    #            Gls > 0) %>%
-    #     select(Player, Squad, Gls, xG) %>%
-    #     gather(key, value, -c(Player, Squad)) %>%
-    #     mutate(value = ifelse(key == "Gls", value, -value))
-    # 
-    #   ggplot(data,
-    #          aes(x = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
-    #              y = value,
-    #              fill = key)) +
-    #     geom_bar(stat = "identity", width = .6) +
-    #     # geom_vline(xintercept) +
-    #     coord_flip() +
-    #     scale_y_continuous(breaks = seq(-6,6,2),
-    #                        labels = abs(seq(-6,6,2))) +
-    #     labs(x = "Player",
-    #          y = "xG vs Goals") +
-    #     theme(plot.background = element_rect(fill = "gray22"),
-    #           panel.background = element_rect(fill = "gray22"),
-    #           panel.border = element_rect(fill = NA, color = "ivory1", size = 1),
-    #           text = element_text(color = "ivory1", family = "Georgia", face = "bold"),
-    #           strip.text = element_text(color = "ivory1", family = "Georgia",
-    #                                     face = "bold", size = 18),
-    #           strip.background = element_rect(fill = "gray22"),
-    #           panel.grid.major.x = element_blank(),
-    #           panel.grid.major.y = element_blank(),
-    #           axis.title = element_text(color = "ivory1",
-    #                                     size = 10),
-    #           panel.grid.minor = element_blank(),
-    #           legend.position = "right",
-    #           legend.title = element_blank(),
-    #           legend.key = element_blank(),
-    #           axis.text = element_text(color = "ivory1",
-    #                                    size = 10),
-    #           legend.background = element_rect(fill = "gray22"),
-    #           legend.text = element_text(size = 14,
-    #                                      family = "Georgia",
-    #                                      face = "bold",
-    #                                      color = "ivory1"),
-    #           plot.title = element_text(size = 20, face = "bold",
-    #                                     family = "Georgia", hjust = 0.5,
-    #                                     margin = margin(10, 0, 10,0, unit = "pt")),
-    #           plot.subtitle = element_text(size = 12, face = "bold.italic",
-    #                                        family = "Georgia", hjust = 0.5),
-    #           plot.caption = element_text(face = "bold.italic", family="Georgia",
-    #                                       size = 10))
-    # 
-    # }
+    else if(input$plotOption == "Forwards Profile" && input$attributeOption == "Goal contributions") {
+
+      # data = big_5_combined %>%
+      #   mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT")) %>%
+      #   filter(Pos == "FW",
+      #          iconv(Squad, "LATIN1", "ASCII//TRANSLIT") == input$team,
+      #          Min >= 350) %>%
+      #   group_by(league) %>%
+      #   select(league, Player, Glsp90, Astp90, npxGp90, xAp90) %>%
+      #   mutate_at(vars(3:6),
+      #             ~round(percent_rank(.) * 100, 2)) %>%
+      #   gather(key, value, -c("league", "Player"))
+      
+      data <- big_5_combined %>%
+        mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
+               Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT")) %>%
+        filter(Min >= 350) %>%
+        select(league, Player, Pos, Squad, Glsp90, Astp90, npxGp90, xAp90) %>%
+        group_by(league) %>%
+        mutate_at(vars(5:8),
+                  ~round(percent_rank(.) * 100, 2)) %>%
+        filter(Pos == "FW",
+               Squad == input$team) %>%
+        gather(key, value, -c("league", "Player", "Pos", "Squad"))
+        
+
+      ggplot(data,
+             aes(x = key,
+                 y = value,
+                 fill = Player)) +
+        geom_bar(stat = "identity",
+                 width = 1,
+                 alpha = 0.5) +
+        geom_hline(yintercept = 100,
+                   color = "navajowhite3",
+                   alpha = 1) +
+        geom_hline(yintercept = seq(0, 90, 10),
+                   color = "navajowhite3",
+                   alpha = 0.2) +
+        geom_vline(xintercept = seq(1.5,4.5, 1),
+                   color = "navajowhite3") +
+        scale_y_continuous(expand = c(0,0),
+                           breaks = seq(0,100,10)) +
+        # geom_label(aes(label = value, y = value + 0.005)) +
+        facet_grid(~Player, space = "fixed") +
+        coord_polar(clip = "off") +
+        labs(title= "Percentile ranks in the league - 2020/21",
+             caption = "Visual by Venkat / @VenkyReddevil") +
+        theme(plot.background = element_rect(fill = "gray22"),
+              panel.background = element_rect(fill = "gray22"),
+              panel.border = element_rect(fill = NA, color = "gray22", size = 1),
+              text = element_text(color = "ivory1", family = "Georgia", face = "bold"),
+              strip.text = element_text(color = "ivory1", family = "Georgia",
+                                        face = "bold", size = 18),
+              strip.background = element_rect(fill = "gray22"),
+              panel.grid.major.x = element_blank(),
+              panel.grid.major.y = element_blank(),
+              panel.spacing=unit(0,'npc'),
+              panel.grid.minor = element_blank(),
+              axis.title.x=element_blank(),
+              axis.title.y=element_blank(),
+              legend.position = "none",
+              legend.title = element_blank(),
+              legend.key = element_blank(),
+              axis.text.y = element_blank(),
+              axis.text.x = element_text(color = "ivory1"),
+              legend.background = element_rect(fill = "gray22"),
+              legend.text = element_text(size = 14,
+                                         family = "Georgia",
+                                         face = "bold",
+                                         color = "ivory1"),
+              plot.title = element_text(size = 20, face = "bold",
+                                        family = "Georgia", hjust = 0.5,
+                                        margin = margin(10, 0, 10,0, unit = "pt")),
+              plot.subtitle = element_text(size = 12, face = "bold.italic",
+                                           family = "Georgia", hjust = 0.5),
+              plot.caption = element_text(face = "bold.italic", family="Georgia",
+                                          size = 10, hjust = 0.5))
+
+    }
    
     
   })
