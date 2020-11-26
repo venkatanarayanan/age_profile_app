@@ -289,6 +289,27 @@ function(input, output) {
   })
   
   output$plot <- renderPlot({
-      plot()
-    })  
+    plot()
+  })
+  
+  dataTable <- eventReactive(input$showPlot,{
+    
+    data <- big_5_combined %>%
+      mutate(Player = iconv(Player, 'LATIN1', 'ASCII//TRANSLIT'),
+             Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
+      filter(Min >= 350,
+             Pos == "FW",
+             Squad == input$team) %>%
+      select(Player, Glsp90, npxGp90, Astp90, xAp90)
+    
+    datatable(data)
+    
+  })
+  
+  output$dataTable <- renderDT({
+    
+    dataTable()
+    
+   
+  })
 }

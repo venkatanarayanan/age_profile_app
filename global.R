@@ -6,6 +6,7 @@ library(tidyverse)
 library(magrittr)
 library(scales)
 library(ggradar)
+library(DT)
 
 big_5_combined <- read.csv("big_5_data.csv")
 

@@ -32,6 +32,7 @@ fluidPage(
     ),
     mainPanel(
       plotOutput("plot"),
+      DTOutput("dataTable"),
       conditionalPanel(
         condition = "input.plotOption == 'Forwards Profile' && input.attributeOption == 'Team Leaders'",
         div(
