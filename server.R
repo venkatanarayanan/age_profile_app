@@ -13,9 +13,20 @@ function(input, output) {
   
   output$sideNote <- renderText({
     "Note:\n'Mean Age' in the plot refers to Weighted mean age.\nValues might slightly differ from the fbref values as\n
-    I have not included the 'days' and only included 'years' while calculating the mean.\nSome letters are also
-    not encoded properly. I am working on the same and the issue will be resolved soon\n.Please feel free to suggest anything"
+    I have not included the 'days' and only included 'years' while calculating the mean.\nPlease feel free to suggest anything"
   })
+  
+  reactive_text <- eventReactive( input$showPlot, {
+    
+    "The above plot is called a 'Radar Plot'. The plot has three circles - minimum(inner), average(mid), maximum(outer).\nEach player is
+    characterized by the metric. For example, if a player is in the outermost circle(maximum) for goals, the player can\n
+    be termed as a 'Good Goalscorer'. Please note that this app is in a developmental stage and will be constantly\n
+    updated to provide the best features."
+    
+  })
+  
+  output$aboutNote <- renderText({ reactive_text() })
+
   
   output$leagueSelector <- renderUI({
     selectInput(
@@ -44,7 +55,7 @@ function(input, output) {
     selectInput(
       inputId = "plotOption",
       label = "Select the type of viz: ",
-      choices = c("Squad Profile"),#, "Players' xG vs Goals", "Forwards Profile"),
+      choices = c("Squad Profile", "Forwards Profile"),
       selected = TRUE
     )
     
@@ -120,33 +131,63 @@ function(input, output) {
                                           size = 10))
     }
     
-    # else if(input$plotOption == "Forwards Profile") {
-    #   
-    #   
-    #   data = big_5_combined %>%
-    #     mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT")) %>%
-    #     filter(Pos == "FW",
-    #            Squad == input$team,
-    #            Min >= 350) %>%
-    #     select(Player, Glsp90, Astp90, npxGp90, xAp90) %>%
-    #     rename(group = Player) %>%
-    #     mutate_at(vars(-group),
-    #               funs(rescale))
-    # 
-    #   ggradar(data,
-    #           grid.label.size = 4,
-    #           axis.label.size = 4,
-    #           values.radar = c("0%", "50%","100%"),
-    #           group.point.size = 5,
-    #           group.line.width = 1.5,
-    #           legend.text.size= 10) +
-    #   facet_wrap(~group) +
-    #   theme(legend.position = "none")
-    # 
-    # }
-    # 
+    else if(input$plotOption == "Forwards Profile") {
+
+
+      data = big_5_combined %>%
+        mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT")) %>%
+        filter(Pos == "FW",
+               iconv(Squad, "LATIN1", "ASCII//TRANSLIT") == input$team,
+               Min >= 350) %>%
+        select(Player, Glsp90, Astp90, npxGp90, xAp90) %>%
+        rename(group = Player) %>%
+        mutate_at(vars(-group),
+                  funs(rescale))
+
+      ggradar(data,
+              font.radar = "Georgia",
+              grid.label.size = 4,
+              axis.label.size = 3,
+              values.radar = c("0%", "50%","100%"),
+              group.point.size = 3,
+              group.line.width = 1.5,
+              background.circle.colour = "gray",
+              background.circle.transparency = 0.2,
+              legend.text.size= 10,
+              label.gridline.min = "",
+              label.gridline.mid = "",
+              label.gridline.max = "",
+              gridline.min.linetype = 1,
+              gridline.max.linetype = 1,
+              gridline.mid.linetype = 1,
+              axis.label.offset = 1.15,
+              gridline.min.colour = "gray22",
+              gridline.mid.colour = "gray22",
+              axis.labels = c("Goals p90", "Asts\np90",
+                              "NP xG p90", "xA\np90")) +
+      facet_wrap(~group, ncol = 3) +
+      labs(title = paste0("A comparison of the different Forwards - ", input$team),
+           subtitle = "( 2020/21 - Minimum 350 minutes )",
+           caption = "Visualization by Venkatanarayanan/@VenkyReddevil") +
+      theme(panel.spacing.x=unit(2, "lines"),
+            panel.spacing.y=unit(2, "lines"),
+            text = element_text(color = "gray22", family = "Georgia", face = "bold"),
+            strip.text = element_text(color = "gray22", family = "Georgia",
+                                      face = "bold", size = 14),
+            legend.position = "none",
+            strip.background = element_blank(),
+            plot.title = element_text(size = 20, face = "bold",
+                                      family = "Georgia", hjust = 0.5,
+                                      margin = margin(10, 0, 10,0, unit = "pt")),
+            plot.subtitle = element_text(size = 12, face = "bold.italic",
+                                         family = "Georgia", hjust = 0.5),
+            plot.caption = element_text(face = "bold.italic", family="Georgia", 
+                                        size = 10, hjust = 0.5))
+
+    }
+
     # else {
-    #   
+    # 
     #   data = big_5_combined %>%
     #     filter(iconv(Squad, "LATIN1", "ASCII//TRANSLIT") == input$team,
     #            grepl("FW|MF", Pos),
@@ -154,7 +195,7 @@ function(input, output) {
     #     select(Player, Squad, Gls, xG) %>%
     #     gather(key, value, -c(Player, Squad)) %>%
     #     mutate(value = ifelse(key == "Gls", value, -value))
-    #   
+    # 
     #   ggplot(data,
     #          aes(x = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
     #              y = value,
@@ -193,9 +234,9 @@ function(input, output) {
     #                                     margin = margin(10, 0, 10,0, unit = "pt")),
     #           plot.subtitle = element_text(size = 12, face = "bold.italic",
     #                                        family = "Georgia", hjust = 0.5),
-    #           plot.caption = element_text(face = "bold.italic", family="Georgia", 
+    #           plot.caption = element_text(face = "bold.italic", family="Georgia",
     #                                       size = 10))
-    #   
+    # 
     # }
    
     

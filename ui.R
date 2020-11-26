@@ -24,7 +24,11 @@ fluidPage(
       )
     ),
     mainPanel(
-      plotOutput("plot")
+      plotOutput("plot"),
+      div(
+        style = "font-style: italic;font-size:12px;text-align:center;margin: 10px 0 10px 0;",
+        textOutput("aboutNote")
+      )
     )
   ),
   div(
