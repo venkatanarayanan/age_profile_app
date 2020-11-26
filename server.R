@@ -27,11 +27,21 @@ function(input, output) {
   
   output$aboutNote <- renderText({ reactive_text() })
 
+  output$plotSelector <- renderUI({
+    
+    selectInput(
+      inputId = "plotOption",
+      label = "Select the type of viz: ",
+      choices = c("Squad Profile", "Forwards Profile", "Compare Forwards"),
+      selected = TRUE
+    )
+    
+  })
   
   output$leagueSelector <- renderUI({
     selectInput(
       inputId = "league",
-      label = "Select the League: ",
+      label = if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0  ) { "Select Player 1 League: " } else { "Select the League:" },
       choices = leagueNames,
       selected = TRUE
     )
@@ -44,36 +54,109 @@ function(input, output) {
     
     selectInput(
       inputId = "team",
-      label = "Select the team: ",
+      label = if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0 ) { "Select Player 1 Team: " } else { "Select the Team:" },
       choices = teamList,
       selected = TRUE
     )
   })
-  
-  output$plotSelector <- renderUI({
+
+  output$playerOneSelector <-  renderUI({
     
-    selectInput(
-      inputId = "plotOption",
-      label = "Select the type of viz: ",
-      choices = c("Squad Profile", "Forwards Profile"),
-      selected = TRUE
-    )
-    
+    if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0 ){
+      
+      data <- big_5_combined %>%
+        mutate(Player = iconv(Player, 'LATIN1', 'ASCII//TRANSLIT'),
+               Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
+        filter(league == input$league,
+               Squad == input$team,
+               Pos == "FW") %>%
+        select(Player)
+      
+      selectInput(
+        inputId = "playerOne",
+        label = "Select Player 1:",
+        choices = data,
+        selected = TRUE
+      )  
+      
+    }
   })
   
   
+  output$leagueTwoSelector <-  renderUI({
+    
+    if(input$plotOption == "Compare Forwards" && length(input$plotOption) > 0){
+      
+      selectInput(
+        inputId = "leagueTwo",
+        label = "Select Player 2 League:",
+        choices = leagueNames,
+        selected = TRUE
+      )  
+      
+    }
+  })
+  
+  output$teamTwoSelector <-  renderUI({
+    
+    req(input$leagueTwo)
+    
+    if(input$plotOption == "Compare Forwards" && length(input$plotOption) > 0){
+      
+      data <- big_5_combined %>%
+        mutate(Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
+        filter(league == input$leagueTwo) %>%
+        select(Squad)
+      
+      selectInput(
+        inputId = "teamTwo",
+        label = "Select Team 2:",
+        choices = data,
+        selected = TRUE
+      )  
+      
+    }
+  })
+  
+  output$playerTwoSelector <-  renderUI({
+    
+    req(input$playerOne)
+    req(input$teamTwo)
+    req(input$leagueTwo)
+    
+    if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0 ){
+      
+      data <- big_5_combined %>%
+        mutate(Player = iconv(Player, 'LATIN1', 'ASCII//TRANSLIT'),
+               Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
+        filter(Player != input$playerOne,
+               Squad == input$teamTwo,
+               league == input$leagueTwo,
+               Pos == "FW") %>%
+        select(Player)
+      
+      selectInput(
+        inputId = "playerTwo",
+        label = "Select Player 2:",
+        choices = data,
+        selected = TRUE
+      )  
+      
+    }
+  })
+  
   output$attributeSelector <-  renderUI({
     
-    if(length(input$plotOption > 1) && input$plotOption == "Forwards Profile"){
-    
+    if( ( length(input$plotOption) > 0 && input$plotOption == "Forwards Profile" ) | ( length(input$plotOption) > 0 && input$plotOption == "Compare Forwards" ) ){
+      
       selectInput(
         inputId = "attributeOption",
         label = "Select the attribute: ",
         choices = c("Team Leaders","Goal contributions"),
         selected = TRUE
-      )  
-      
-    }
+      )
+    } 
+    
   })
   
   
@@ -286,30 +369,185 @@ function(input, output) {
     }
    
     
+    else if(input$plotOption == "Forwards Profile" && input$attributeOption == "Goal contributions") {
+    
+      
+      data <- big_5_combined %>%
+        mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
+               Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT")) %>%
+        filter(Min >= 350) %>%
+        select(league, Player, Pos, Squad, Glsp90, Astp90, npxGp90, xAp90) %>%
+        group_by(league) %>%
+        mutate_at(vars(5:8),
+                  ~round(percent_rank(.) * 100, 2)) %>%
+        filter(Pos == "FW",
+               Squad == input$team) %>%
+        gather(key, value, -c("league", "Player", "Pos", "Squad"))
+      
+      
+      ggplot(data,
+             aes(x = key,
+                 y = value,
+                 fill = Player)) +
+        geom_bar(stat = "identity",
+                 width = 1,
+                 alpha = 0.5) +
+        geom_hline(yintercept = 100,
+                   color = "navajowhite3",
+                   alpha = 1) +
+        geom_hline(yintercept = seq(0, 90, 10),
+                   color = "navajowhite3",
+                   alpha = 0.2) +
+        geom_vline(xintercept = seq(1.5,4.5, 1),
+                   color = "navajowhite3") +
+        scale_y_continuous(expand = c(0,0),
+                           breaks = seq(0,100,10)) +
+        # geom_label(aes(label = value, y = value + 0.005)) +
+        facet_grid(~Player, space = "fixed") +
+        coord_polar(clip = "off") +
+        labs(title= "Percentile ranks in the league - 2020/21",
+             caption = "Visual by Venkat / @VenkyReddevil") +
+        theme(plot.background = element_rect(fill = "gray22"),
+              panel.background = element_rect(fill = "gray22"),
+              panel.border = element_rect(fill = NA, color = "gray22", size = 1),
+              text = element_text(color = "ivory1", family = "Georgia", face = "bold"),
+              strip.text = element_text(color = "ivory1", family = "Georgia",
+                                        face = "bold", size = 18),
+              strip.background = element_rect(fill = "gray22"),
+              panel.grid.major.x = element_blank(),
+              panel.grid.major.y = element_blank(),
+              panel.spacing=unit(0,'npc'),
+              panel.grid.minor = element_blank(),
+              axis.title.x=element_blank(),
+              axis.title.y=element_blank(),
+              legend.position = "none",
+              legend.title = element_blank(),
+              legend.key = element_blank(),
+              axis.text.y = element_blank(),
+              axis.text.x = element_text(color = "ivory1"),
+              legend.background = element_rect(fill = "gray22"),
+              legend.text = element_text(size = 14,
+                                         family = "Georgia",
+                                         face = "bold",
+                                         color = "ivory1"),
+              plot.title = element_text(size = 20, face = "bold",
+                                        family = "Georgia", hjust = 0.5,
+                                        margin = margin(10, 0, 10,0, unit = "pt")),
+              plot.subtitle = element_text(size = 12, face = "bold.italic",
+                                           family = "Georgia", hjust = 0.5),
+              plot.caption = element_text(face = "bold.italic", family="Georgia",
+                                          size = 10, hjust = 0.5))
+      
+    }
+    
+    
+    else if(input$plotOption == "Compare Forwards" && input$attributeOption == "Goal contributions") {
+      
+      
+      data <- big_5_combined %>%
+        mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
+               Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT")) %>%
+        filter(Min >= 350) %>%
+        select(league, Player, Pos, Squad, Glsp90, Astp90, npxGp90, xAp90) %>%
+        group_by(league) %>%
+        mutate_at(vars(5:8),
+                  ~round(percent_rank(.) * 100, 2)) %>%
+        filter(Player %in% c(input$playerOne, input$playerTwo)) %>%
+        gather(key, value, -c("league", "Player", "Pos", "Squad"))
+      
+      
+      ggplot(data,
+             aes(x = key,
+                 y = value,
+                 fill = Player)) +
+        geom_bar(stat = "identity",
+                 width = 1,
+                 alpha = 0.5) +
+        geom_hline(yintercept = 100,
+                   color = "navajowhite3",
+                   alpha = 1) +
+        geom_hline(yintercept = seq(0, 90, 10),
+                   color = "navajowhite3",
+                   alpha = 0.2) +
+        geom_vline(xintercept = seq(1.5,4.5, 1),
+                   color = "navajowhite3") +
+        scale_y_continuous(expand = c(0,0),
+                           breaks = seq(0,100,10)) +
+        # geom_label(aes(label = value, y = value + 0.005)) +
+        facet_grid(~Player, space = "fixed") +
+        coord_polar(clip = "off") +
+        labs(title= "Percentile ranks in the league - 2020/21",
+             caption = "Visual by Venkat / @VenkyReddevil") +
+        theme(plot.background = element_rect(fill = "gray22"),
+              panel.background = element_rect(fill = "gray22"),
+              panel.border = element_rect(fill = NA, color = "gray22", size = 1),
+              text = element_text(color = "ivory1", family = "Georgia", face = "bold"),
+              strip.text = element_text(color = "ivory1", family = "Georgia",
+                                        face = "bold", size = 18),
+              strip.background = element_rect(fill = "gray22"),
+              panel.grid.major.x = element_blank(),
+              panel.grid.major.y = element_blank(),
+              panel.spacing=unit(0,'npc'),
+              panel.grid.minor = element_blank(),
+              axis.title.x=element_blank(),
+              axis.title.y=element_blank(),
+              legend.position = "none",
+              legend.title = element_blank(),
+              legend.key = element_blank(),
+              axis.text.y = element_blank(),
+              axis.text.x = element_text(color = "ivory1"),
+              legend.background = element_rect(fill = "gray22"),
+              legend.text = element_text(size = 14,
+                                         family = "Georgia",
+                                         face = "bold",
+                                         color = "ivory1"),
+              plot.title = element_text(size = 20, face = "bold",
+                                        family = "Georgia", hjust = 0.5,
+                                        margin = margin(10, 0, 10,0, unit = "pt")),
+              plot.subtitle = element_text(size = 12, face = "bold.italic",
+                                           family = "Georgia", hjust = 0.5),
+              plot.caption = element_text(face = "bold.italic", family="Georgia",
+                                          size = 10, hjust = 0.5))
+      
+    }
+    
   })
   
   output$plot <- renderPlot({
     plot()
   })
-  
+
   dataTable <- eventReactive(input$showPlot,{
     
-    data <- big_5_combined %>%
-      mutate(Player = iconv(Player, 'LATIN1', 'ASCII//TRANSLIT'),
-             Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
-      filter(Min >= 350,
-             Pos == "FW",
-             Squad == input$team) %>%
-      select(Player, Glsp90, npxGp90, Astp90, xAp90)
+    if (input$plotOption == "Forward Profiles"){
+      data <- big_5_combined %>%
+        mutate(Player = iconv(Player, 'LATIN1', 'ASCII//TRANSLIT'),
+               Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
+        filter(Min >= 350,
+               Pos == "FW",
+               Squad == input$team) %>%
+        select(Player, Glsp90, npxGp90, Astp90, xAp90)
+      
+    } else {
+      
+      data <- big_5_combined %>%
+        mutate(Player = iconv(Player, 'LATIN1', 'ASCII//TRANSLIT'),
+               Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
+        filter(Player %in% c(input$playerOne, input$playerTwo)) %>%
+        select(Player, Glsp90, npxGp90, Astp90, xAp90)
+      
+    }
+
     
+
     datatable(data)
-    
+
   })
   
   output$dataTable <- renderDT({
     
     dataTable()
-    
-   
+
+ 
   })
 }

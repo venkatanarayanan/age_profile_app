@@ -17,11 +17,23 @@ fluidPage(
     div(
       style = "margin-top: 50px;",
       sidebarPanel(
-        htmlOutput("leagueSelector"),
         htmlOutput("plotSelector"),
+        htmlOutput("leagueSelector"),
         htmlOutput("teamSelector"),
-        conditionalPanel(condition = "input.plotOption == 'Forwards Profile'",
-          htmlOutput("attributeSelector")
+        conditionalPanel(condition = "input.plotOption == 'Compare Forwards'",
+                         htmlOutput("playerOneSelector")
+        ),
+        conditionalPanel(condition = "input.plotOption == 'Compare Forwards'",
+                         htmlOutput("leagueTwoSelector")
+        ),
+        conditionalPanel(condition = "input.plotOption == 'Compare Forwards'",
+                         htmlOutput("teamTwoSelector")
+        ),
+        conditionalPanel(condition = "input.plotOption == 'Compare Forwards'",
+                        htmlOutput("playerTwoSelector")
+        ),
+        conditionalPanel(condition = "input.plotOption == 'Forwards Profile' | input.plotOption == 'Compare Forwards'",
+                         htmlOutput("attributeSelector")
         ),
         actionButton("showPlot", label = "Show Plot"),
         div(
@@ -32,7 +44,10 @@ fluidPage(
     ),
     mainPanel(
       plotOutput("plot"),
-      DTOutput("dataTable"),
+      conditionalPanel(
+        condition = "input.plotOption == 'Forwards Profile' || input.plotOption == 'Compare Forwards' && input.attributeOption == 'Goal contributions'",
+        DTOutput("dataTable")
+      ),
       conditionalPanel(
         condition = "input.plotOption == 'Forwards Profile' && input.attributeOption == 'Team Leaders'",
         div(
