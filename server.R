@@ -170,34 +170,39 @@ function(input, output) {
       ggplot(data) +
         geom_point(aes(x = Age, 
                        y = percent_mins,
-                       color = Pos),
-                   size = 4) +
+                       fill = category),
+                   pch = 21,
+                   size = 5) +
         geom_text_repel(aes(label = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
                             x = Age,
                             y = percent_mins),
                         color = "ivory1",
                         size = 3,
+                        fontface = "bold",
+                        family = "Georgia",
                         box.padding = unit(0.5, "lines")) +
         geom_vline(xintercept = first(subset(big_5_combined$mean_league_age,
                                              big_5_combined$league == input$league)),
                    linetype = 2,
                    alpha = 0.5,
                    color = "ivory1") +
-        geom_text(aes(label = "Mean league age",
-                      x = first(subset(big_5_combined$mean_league_age,
-                                       big_5_combined$league == input$league)),
-                      y = 20),
-                  size = 3,
-                  angle = 90,
-                  color = "ivory1",
-                  alpha = 0.5) +
-        scale_color_manual(values = c("#3cb371", "#f9e211",
-                                      "#88ccee", "#d04e59")) +
-        labs(caption = "Visualisation by Venkatanarayanan / @VenkyReddevil",
-             title = input$team,
-             subtitle = paste0("Mean Squad Age", " = ", round(first(subset(big_5_combined$mean_squad_age,
-                                                                           big_5_combined$Squad == input$team)),
-                                                              2)),
+        scale_fill_manual(values= c("#f0e442", "indianred1",
+                                    "#88ccee", "mediumseagreen")) +
+        scale_y_continuous(labels = function(x) paste0(x, "%"),
+                           limits = c(0,100),
+                           breaks = seq(0, 100, 25)) +
+        labs(caption = "Twitter: @VenkyReddevil",
+             title = paste0(input$team," | ",
+                            "<i style = 'color: darkorange'>Mean Squad Age = </i>", 
+                            "<i style = 'color: darkorange'>", 
+                            round(first(subset(big_5_combined$mean_squad_age,
+                                               big_5_combined$Squad == input$team)),
+                                  2),
+                            "</i>"),
+             subtitle = "<span style = 'color: indianred1'>Most Goals</span> ,
+             <span style = 'color: #f0e442'> Most Assists</span> , 
+             <span style = 'color: #88ccee'> Most Minutes</span> | 
+             The dotted line indicates the Weighted Mean League Age",
              x = "Age",
              y = "% of team minutes played this season (so far)") +
         theme(plot.background = element_rect(fill = "gray22"),
@@ -212,7 +217,7 @@ function(input, output) {
               axis.title = element_text(color = "ivory1",
                                         size = 10),
               panel.grid.minor = element_blank(),
-              legend.position = "right",
+              legend.position = "none",
               legend.title = element_blank(),
               legend.key = element_blank(),
               axis.text = element_text(color = "ivory1",
@@ -222,11 +227,11 @@ function(input, output) {
                                          family = "Georgia",
                                          face = "bold",
                                          color = "ivory1"),
-              plot.title = element_text(size = 20, face = "bold",
-                                        family = "Georgia", hjust = 0.5,
-                                        margin = margin(10, 0, 10,0, unit = "pt")),
-              plot.subtitle = element_text(size = 12, face = "bold.italic",
-                                           family = "Georgia", hjust = 0.5),
+              plot.title = element_markdown(size = 20, face = "bold",
+                                            family = "Georgia",
+                                            margin = margin(5, 0, 5,0, unit = "pt")),
+              plot.subtitle = element_markdown(size = 12, face = "bold",
+                                               family = "Georgia", color = "ivory1"),
               plot.caption = element_text(face = "bold.italic", family="Georgia", 
                                           size = 10))
     }
