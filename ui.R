@@ -45,7 +45,7 @@ fluidPage(
     mainPanel(
       plotOutput("plot"),
       conditionalPanel(
-        condition = "input.plotOption == 'Forwards Profile' || input.plotOption == 'Compare Forwards' && input.attributeOption == 'Goal contributions'",
+        condition = "input.plotOption == 'Forwards Profile' && input.attributeOption == 'Goal contributions'|| input.plotOption == 'Compare Forwards' && input.attributeOption == 'Goal contributions'",
         DTOutput("dataTable")
       ),
       conditionalPanel(
