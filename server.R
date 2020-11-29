@@ -64,13 +64,8 @@ function(input, output) {
     
     if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0 ){
       
-      data <- big_5_combined %>%
-        mutate(Player = iconv(Player, 'LATIN1', 'ASCII//TRANSLIT'),
-               Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
-        filter(league == input$league,
-               Squad == input$team,
-               Pos == "FW") %>%
-        select(Player)
+      data <- subset(iconv(big_5_combined$Player, "LATIN1", "ASCII//TRANSLIT"),
+                         big_5_combined$Squad == input$team & big_5_combined$Pos == "FW")
       
       selectInput(
         inputId = "playerOne",
@@ -126,14 +121,8 @@ function(input, output) {
     
     if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0 ){
       
-      data <- big_5_combined %>%
-        mutate(Player = iconv(Player, 'LATIN1', 'ASCII//TRANSLIT'),
-               Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
-        filter(Player != input$playerOne,
-               Squad == input$teamTwo,
-               league == input$leagueTwo,
-               Pos == "FW") %>%
-        select(Player)
+      data <- subset(iconv(big_5_combined$Player, "LATIN1", "ASCII//TRANSLIT"),
+                     big_5_combined$Squad == input$teamTwo & big_5_combined$Pos == "FW")
       
       selectInput(
         inputId = "playerTwo",
@@ -165,7 +154,8 @@ function(input, output) {
 
     if(input$plotOption == "Squad Profile"){
       
-      data = big_5_combined %>% filter(iconv(Squad, "LATIN1", "ASCII//TRANSLIT") == input$team)
+      data = big_5_combined %>%
+        filter(iconv(Squad, "LATIN1", "ASCII//TRANSLIT") == input$team)
       
       ggplot(data) +
         geom_point(aes(x = Age, 
@@ -238,12 +228,13 @@ function(input, output) {
     
     else if(input$plotOption == "Forwards Profile" && input$attributeOption == "Team Leaders") {
 
-
       data = big_5_combined %>%
-        mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT")) %>%
+        mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
+               Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT")) %>%
         filter(Pos == "FW",
-               iconv(Squad, "LATIN1", "ASCII//TRANSLIT") == input$team,
+               Squad == input$team,
                Min >= 350) %>%
+        ungroup() %>%
         select(Player, Glsp90, Astp90, npxGp90, xAp90) %>%
         rename(group = Player) %>%
         mutate_at(vars(-group),
@@ -524,7 +515,7 @@ function(input, output) {
 
   dataTable <- eventReactive(input$showPlot,{
     
-    if (input$plotOption == "Forward Profiles"){
+    if (input$plotOption == "Forwards Profile" & input$attributeOption == "Goal contributions" ){
       data <- big_5_combined %>%
         mutate(Player = iconv(Player, 'LATIN1', 'ASCII//TRANSLIT'),
                Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
@@ -532,18 +523,7 @@ function(input, output) {
                Pos == "FW",
                Squad == input$team) %>%
         select(Player, Glsp90, npxGp90, Astp90, xAp90)
-      
-    } else {
-      
-      data <- big_5_combined %>%
-        mutate(Player = iconv(Player, 'LATIN1', 'ASCII//TRANSLIT'),
-               Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
-        filter(Player %in% c(input$playerOne, input$playerTwo)) %>%
-        select(Player, Glsp90, npxGp90, Astp90, xAp90)
-      
     }
-
-    
 
     datatable(data)
 
