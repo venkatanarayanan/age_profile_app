@@ -9,6 +9,7 @@ library(ggradar)
 library(DT)
 library(ggtext)
 library(gghighlight)
+library(ggiraph)
 
 big_5_combined <- read.csv("big_5_data.csv")
 
