@@ -33,7 +33,7 @@ function(input, output, session) {
     selectInput(
       inputId = "plotOption",
       label = "Select the type of viz: ",
-      choices = c("Squad Profile", "Forwards Profile", "Compare Forwards", "ScatterPlot"),
+      choices = c("Squad Profile", "Forwards Profile", "Compare Forwards", "Attacking Contribution"),
       selected = TRUE
     )
     
@@ -49,7 +49,9 @@ function(input, output, session) {
   })
   
   output$teamSelector <- renderUI({
-    
+      
+    if(input$plotOption != "Attacking Contribution" && length(input$plotOption) > 0) {
+      
       teamList <- subset(iconv(big_5_combined$Squad, "LATIN1", "ASCII//TRANSLIT"),
                          big_5_combined$league == input$league)
       
@@ -58,7 +60,10 @@ function(input, output, session) {
         label = if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0 ) { "Select Player 1 Team: " } else { "Select the Team:" },
         choices = teamList,
         selected = TRUE
-      )  
+      ) 
+      
+    }
+      
       
 
   })
@@ -156,12 +161,16 @@ function(input, output, session) {
   scatterPlot <- reactive({
     
     
-    req(input$team)
+    req(input$league)
     
     data <- big_5_combined %>%
       mutate(Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT"),
              Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT")) %>%
-      filter(Squad == input$team)
+      filter(league == input$league,
+             Pos %in% c("MF", "FW"),
+             Min > 350) %>%
+      ungroup() %>%
+      select(Player, Min, MP, Starts, Gls, Ast, Glsp90, Astp90)
     
     ggplot(data)+
       geom_point_interactive(aes(x = Glsp90,
@@ -196,7 +205,6 @@ function(input, output, session) {
   observeEvent(input$reset, {
     session$sendCustomMessage(type = 'plot_set', message = character(0))
   })
-  
   
   
   output$datatab <- renderTable({
