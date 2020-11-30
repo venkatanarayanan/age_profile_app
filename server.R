@@ -160,7 +160,7 @@ function(input, output) {
       ggplot(data) +
         geom_point(aes(x = Age, 
                        y = percent_mins,
-                       fill = category),
+                       fill = Pos),
                    pch = 21,
                    size = 5) +
         geom_text_repel(aes(label = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
@@ -189,9 +189,10 @@ function(input, output) {
                                                big_5_combined$Squad == input$team)),
                                   2),
                             "</i>"),
-             subtitle = "<span style = 'color: indianred1'>Most Goals</span> ,
-             <span style = 'color: #f0e442'> Most Assists</span> , 
-             <span style = 'color: #88ccee'> Most Minutes</span> | 
+             subtitle = "<span style = 'color: #88ccee'>Goalkeepers</span> ,
+             <span style = 'color: #f0e442'> Defenders</span> , 
+             <span style = 'color: mediumseagreen'> Midfielders</span> ,
+             <span style = 'color: indianred1'> Forwards</span> | 
              The dotted line indicates the Weighted Mean League Age",
              x = "Age",
              y = "% of team minutes played this season (so far)") +
