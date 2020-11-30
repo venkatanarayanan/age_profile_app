@@ -32,6 +32,9 @@ big_5_combined %<>%
                            ifelse(Min == max(Min), "Most Minutes",
                                   ifelse(Ast == max(Ast), "Most Assists", "Normal"))))
 
+
+big_5_combined$Player <- gsub("'", "", big_5_combined$Player)
+
 leagueNames <- as.character(unique(big_5_combined$league))
 
 
