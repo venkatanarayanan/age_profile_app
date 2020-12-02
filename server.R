@@ -176,7 +176,8 @@ function(input, output, session) {
       geom_point_interactive(aes(x = Glsp90,
                                  y = Astp90,
                                  tooltip = Player,
-                                 data_id = Player))
+                                 data_id = Player),
+                             size = 3)
       
     
   })
@@ -195,9 +196,13 @@ function(input, output, session) {
     girafe(code = print(scatterPlot()),
            width_svg = 6, height_svg = 5,
            options = list(
-             opts_hover(css = "fill:#FF3333;stroke:black;cursor:pointer;", reactive = TRUE),
+             opts_hover(css = "fill:#FF3333;
+                               stroke:black;
+                               cursor:pointer",
+                        reactive = TRUE),
              opts_selection(
-               type = "multiple", css = "fill:#FF3333;stroke:black;")
+               type = "multiple", css = "fill:#FF3333;stroke:black;"),
+             opts_selection_inv(css = "fill:blue")
            ))
     
   })
