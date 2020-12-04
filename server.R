@@ -1,4 +1,4 @@
-function(input, output) {
+function(input, output, session) {
   output$titleText <- renderText({
     "Squad Profile of Different teams"
   })
@@ -26,13 +26,14 @@ function(input, output) {
   })
   
   output$aboutNote <- renderText({ reactive_text() })
+  
 
   output$plotSelector <- renderUI({
     
     selectInput(
       inputId = "plotOption",
       label = "Select the type of viz: ",
-      choices = c("Squad Profile", "Forwards Profile", "Compare Forwards"),
+      choices = c("Squad Profile", "Forwards Profile", "Compare Forwards", "Attacking Contribution"),
       selected = TRUE
     )
     
@@ -49,15 +50,21 @@ function(input, output) {
   })
   
   output$teamSelector <- renderUI({
-    
-    teamList <- subset(big_5_combined$Squad,big_5_combined$league == input$league)
-    
-    selectInput(
-      inputId = "team",
-      label = if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0 ) { "Select Player 1 Team: " } else { "Select the Team:" },
-      choices = teamList,
-      selected = TRUE
-    )
+
+      
+    if(input$plotOption != "Attacking Contribution" && length(input$plotOption) > 0) {
+      
+      teamList <- subset(big_5_combined$Squad,big_5_combined$league == input$league)
+      
+      selectInput(
+        inputId = "team",
+        label = if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0 ) { "Select Player 1 Team: " } else { "Select the Team:" },
+        choices = teamList,
+        selected = TRUE
+      ) 
+      
+    }
+      
   })
 
   output$playerOneSelector <-  renderUI({
@@ -146,7 +153,72 @@ function(input, output) {
     
   })
   
+  ############
   
+  scatterPlot <- reactive({
+    
+    
+    req(input$league)
+    
+    data <- big_5_combined %>%
+      mutate(Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT"),
+             Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT")) %>%
+      filter(league == input$league,
+             Pos %in% c("MF", "FW"),
+             Min > 350) %>%
+      ungroup() %>%
+      select(Player, Min, MP, Starts, Gls, Ast, Glsp90, Astp90)
+    
+    ggplot(data)+
+      geom_point_interactive(aes(x = Glsp90,
+                                 y = Astp90,
+                                 tooltip = Player,
+                                 data_id = Player),
+                             size = 3)
+      
+    
+  })
+  
+  
+  selected_state <- reactive({
+    input$interactivePlot_selected
+  })
+  output$console <- renderPrint({
+    input$interactivePlot_hovered
+  })
+  
+  output$interactivePlot <- renderGirafe({
+    
+    
+    girafe(code = print(scatterPlot()),
+           width_svg = 6, height_svg = 5,
+           options = list(
+             opts_hover(css = "fill:#FF3333;
+                               stroke:black;
+                               cursor:pointer",
+                        reactive = TRUE),
+             opts_selection(
+               type = "multiple", css = "fill:#FF3333;stroke:black;"),
+             opts_selection_inv(css = "fill:blue")
+           ))
+    
+  })
+  
+  observeEvent(input$reset, {
+    session$sendCustomMessage(type = 'plot_set', message = character(0))
+  })
+  
+  
+  output$datatab <- renderTable({
+    out <- big_5_combined[big_5_combined$Player %in% selected_state(),]
+    if( nrow(out) < 1 ) return(NULL)
+    row.names(out) <- NULL
+    out
+  })
+  
+  
+  
+  ###########
   
   plot <- eventReactive(input$showPlot, {
 

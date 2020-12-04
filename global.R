@@ -10,6 +10,7 @@ library(ggradar)
 library(DT)
 library(ggtext)
 library(gghighlight)
+library(ggiraph)
 
 big_5_combined <- read.csv("big_5_data.csv")
 
@@ -33,6 +34,9 @@ big_5_combined %<>%
                                   ifelse(Ast == max(Ast), "Most Assists", "Normal"))),
          Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
          Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT"))
+
+
+big_5_combined$Player <- gsub("'", "", big_5_combined$Player)
 
 leagueNames <- as.character(unique(big_5_combined$league))
 

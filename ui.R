@@ -43,6 +43,11 @@ fluidPage(
       )
     ),
     mainPanel(
+      conditionalPanel(condition = "input.plotOption == 'Attacking Contribution'",
+                       girafeOutput("interactivePlot"),
+                       actionButton("reset", label = "Reset selection"),
+                       tableOutput("datatab")
+      ),
       plotOutput("plot"),
       conditionalPanel(
         condition = "input.plotOption == 'Forwards Profile' && input.attributeOption == 'Goal contributions'|| input.plotOption == 'Compare Forwards' && input.attributeOption == 'Goal contributions'",
