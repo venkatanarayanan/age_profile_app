@@ -198,8 +198,7 @@ function(input, output, session) {
                                cursor:pointer",
                         reactive = TRUE),
              opts_selection(
-               type = "multiple", css = "fill:#FF3333;stroke:black;"),
-             opts_selection_inv(css = "fill:blue")
+               type = "multiple", css = "fill:#FF3333;stroke:black;")
            ))
     
   })
@@ -565,7 +564,7 @@ function(input, output, session) {
   
   output$plot <- renderPlot({
     plot()
-  })
+  }, bg = "transparent")
 
   dataTable <- eventReactive(input$showPlot,{
     
