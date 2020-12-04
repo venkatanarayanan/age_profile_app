@@ -41,7 +41,8 @@ function(input, output) {
   output$leagueSelector <- renderUI({
     selectInput(
       inputId = "league",
-      label = if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0  ) { "Select Player 1 League: " } else { "Select the League:" },
+      label = if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0  ) 
+        { "Select Player 1 League: " } else { "Select the League:" },
       choices = leagueNames,
       selected = TRUE
     )
@@ -49,8 +50,7 @@ function(input, output) {
   
   output$teamSelector <- renderUI({
     
-    teamList <- subset(iconv(big_5_combined$Squad, "LATIN1", "ASCII//TRANSLIT"),
-                       big_5_combined$league == input$league)
+    teamList <- subset(big_5_combined$Squad,big_5_combined$league == input$league)
     
     selectInput(
       inputId = "team",
@@ -64,8 +64,7 @@ function(input, output) {
     
     if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0 ){
       
-      data <- subset(iconv(big_5_combined$Player, "LATIN1", "ASCII//TRANSLIT"),
-                         big_5_combined$Squad == input$team & big_5_combined$Pos == "FW")
+      data <- subset(big_5_combined$Player, big_5_combined$Squad == input$team & big_5_combined$Pos == "FW")
       
       selectInput(
         inputId = "playerOne",
@@ -99,7 +98,6 @@ function(input, output) {
     if(input$plotOption == "Compare Forwards" && length(input$plotOption) > 0){
       
       data <- big_5_combined %>%
-        mutate(Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
         filter(league == input$leagueTwo) %>%
         select(Squad)
       
@@ -121,7 +119,7 @@ function(input, output) {
     
     if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0 ){
       
-      data <- subset(iconv(big_5_combined$Player, "LATIN1", "ASCII//TRANSLIT"),
+      data <- subset(big_5_combined$Player,
                      big_5_combined$Squad == input$teamTwo & big_5_combined$Pos == "FW")
       
       selectInput(
@@ -155,7 +153,7 @@ function(input, output) {
     if(input$plotOption == "Squad Profile"){
       
       data = big_5_combined %>%
-        filter(iconv(Squad, "LATIN1", "ASCII//TRANSLIT") == input$team)
+        filter(Squad == input$team)
       
       ggplot(data) +
         geom_point(aes(x = Age, 
@@ -163,7 +161,7 @@ function(input, output) {
                        fill = Pos),
                    pch = 21,
                    size = 5) +
-        geom_text_repel(aes(label = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
+        geom_text_repel(aes(label = Player,
                             x = Age,
                             y = percent_mins),
                         color = "ivory1",
@@ -196,8 +194,10 @@ function(input, output) {
              The dotted line indicates the Weighted Mean League Age",
              x = "Age",
              y = "% of team minutes played this season (so far)") +
-        theme(plot.background = element_rect(fill = "gray22"),
+        theme(plot.background = element_rect(fill = "gray22",
+                                             color = "gray22"),
               panel.background = element_rect(fill = "gray22"),
+              plot.margin = margin(0, 0, 0, 0, "cm"),
               panel.border = element_rect(fill = NA, color = "ivory1", size = 1),
               text = element_text(color = "ivory1", family = "Georgia", face = "bold"),
               strip.text = element_text(color = "ivory1", family = "Georgia",
@@ -230,8 +230,6 @@ function(input, output) {
     else if(input$plotOption == "Forwards Profile" && input$attributeOption == "Team Leaders") {
 
       data = big_5_combined %>%
-        mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
-               Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT")) %>%
         filter(Pos == "FW",
                Squad == input$team,
                Min >= 350) %>%
@@ -285,21 +283,8 @@ function(input, output) {
     }
 
     else if(input$plotOption == "Forwards Profile" && input$attributeOption == "Goal contributions") {
-
-      # data = big_5_combined %>%
-      #   mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT")) %>%
-      #   filter(Pos == "FW",
-      #          iconv(Squad, "LATIN1", "ASCII//TRANSLIT") == input$team,
-      #          Min >= 350) %>%
-      #   group_by(league) %>%
-      #   select(league, Player, Glsp90, Astp90, npxGp90, xAp90) %>%
-      #   mutate_at(vars(3:6),
-      #             ~round(percent_rank(.) * 100, 2)) %>%
-      #   gather(key, value, -c("league", "Player"))
       
       data <- big_5_combined %>%
-        mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
-               Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT")) %>%
         filter(Min >= 350) %>%
         select(league, Player, Pos, Squad, Glsp90, Astp90, npxGp90, xAp90) %>%
         group_by(league) %>%
@@ -327,14 +312,15 @@ function(input, output) {
                    color = "navajowhite3") +
         scale_y_continuous(expand = c(0,0),
                            breaks = seq(0,100,10)) +
-        # geom_label(aes(label = value, y = value + 0.005)) +
         facet_grid(~Player, space = "fixed") +
         coord_polar(clip = "off") +
         labs(title= "Percentile ranks in the league - 2020/21",
              caption = "Visual by Venkat / @VenkyReddevil") +
-        theme(plot.background = element_rect(fill = "gray22"),
-              panel.background = element_rect(fill = "gray22"),
-              panel.border = element_rect(fill = NA, color = "gray22", size = 1),
+        theme(plot.background = element_rect(fill = "gray22",
+                                             color = "gray22"),
+              panel.background = element_rect(fill = "gray22",
+                                              color = "gray22"),
+              # panel.border = element_rect(fill = NA, color = "gray22", size = 0),
               text = element_text(color = "ivory1", family = "Georgia", face = "bold"),
               strip.text = element_text(color = "ivory1", family = "Georgia",
                                         face = "bold", size = 18),
@@ -370,8 +356,6 @@ function(input, output) {
     
       
       data <- big_5_combined %>%
-        mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
-               Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT")) %>%
         filter(Min >= 350) %>%
         select(league, Player, Pos, Squad, Glsp90, Astp90, npxGp90, xAp90) %>%
         group_by(league) %>%
@@ -399,7 +383,6 @@ function(input, output) {
                    color = "navajowhite3") +
         scale_y_continuous(expand = c(0,0),
                            breaks = seq(0,100,10)) +
-        # geom_label(aes(label = value, y = value + 0.005)) +
         facet_grid(~Player, space = "fixed") +
         coord_polar(clip = "off") +
         labs(title= "Percentile ranks in the league - 2020/21",
@@ -442,8 +425,6 @@ function(input, output) {
       
       
       data <- big_5_combined %>%
-        mutate(Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
-               Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT")) %>%
         filter(Min >= 350) %>%
         select(league, Player, Pos, Squad, Glsp90, Astp90, npxGp90, xAp90) %>%
         group_by(league) %>%
@@ -518,8 +499,6 @@ function(input, output) {
     
     if (input$plotOption == "Forwards Profile" & input$attributeOption == "Goal contributions" ){
       data <- big_5_combined %>%
-        mutate(Player = iconv(Player, 'LATIN1', 'ASCII//TRANSLIT'),
-               Squad = iconv(Squad, 'LATIN1', 'ASCII//TRANSLIT')) %>%
         filter(Min >= 350,
                Pos == "FW",
                Squad == input$team) %>%
