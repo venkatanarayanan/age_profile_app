@@ -1,10 +1,10 @@
 fluidPage(
   HTML('<meta name="viewport" content="width=1024">'),
-  # setBackgroundColor(
-  #   color = c("#383838"),
-  #   # gradient = "linear",
-  #   # direction = "bottom"
-  # ),
+  setBackgroundColor(
+    color = c("#fffff0"),
+  # gradient = "linear",
+  # direction = "bottom"
+  ),
   div(
     style = "font-weight: bold;font-size:38px;text-align:center;margin: 20px 0 20px 0;",
     textOutput("titleText")
@@ -53,7 +53,7 @@ fluidPage(
         div(
           style = "font-style: italic;font-size:12px;text-align:center;margin: 10px 0 10px 0;",
           textOutput("aboutNote")
-        ) 
+        )
       )
     )
   ),

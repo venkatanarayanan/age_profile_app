@@ -150,7 +150,7 @@ function(input, output) {
   
   plot <- eventReactive(input$showPlot, {
 
-    if(input$plotOption == "Squad Profile"){
+    if(input$plotOption == "Squad Profile" & length( input$plotOption ) > 0){
       
       data = big_5_combined %>%
         filter(Squad == input$team)
@@ -320,14 +320,12 @@ function(input, output) {
                                              color = "gray22"),
               panel.background = element_rect(fill = "gray22",
                                               color = "gray22"),
-              # panel.border = element_rect(fill = NA, color = "gray22", size = 0),
               text = element_text(color = "ivory1", family = "Georgia", face = "bold"),
               strip.text = element_text(color = "ivory1", family = "Georgia",
                                         face = "bold", size = 18),
               strip.background = element_rect(fill = "gray22"),
               panel.grid.major.x = element_blank(),
               panel.grid.major.y = element_blank(),
-              panel.spacing=unit(0,'npc'),
               panel.grid.minor = element_blank(),
               axis.title.x=element_blank(),
               axis.title.y=element_blank(),
@@ -493,7 +491,7 @@ function(input, output) {
   
   output$plot <- renderPlot({
     plot()
-  })
+  }, bg = "transparent")
 
   dataTable <- eventReactive(input$showPlot,{
     
