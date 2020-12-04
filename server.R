@@ -574,6 +574,12 @@ function(input, output, session) {
                Pos == "FW",
                Squad == input$team) %>%
         select(Player, Glsp90, npxGp90, Astp90, xAp90)
+    } else if(input$plotOption == "Compare Forwards" & input$attributeOption == "Goal contributions") {
+      
+      data <- big_5_combined %>%
+        filter(Player %in% c(input$playerOne, input$playerTwo)) %>%
+        select(Player, Glsp90, npxGp90, Astp90, xAp90)
+      
     }
 
     datatable(data)
