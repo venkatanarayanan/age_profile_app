@@ -1,5 +1,6 @@
 library(shiny)
 library(shinydashboard)
+library(shinyWidgets)
 library(extrafont)
 library(ggrepel)
 library(tidyverse)
@@ -30,7 +31,9 @@ big_5_combined %<>%
   group_by(Squad) %>%
   mutate(category = ifelse(Gls == max(Gls), "Most Goals",
                            ifelse(Min == max(Min), "Most Minutes",
-                                  ifelse(Ast == max(Ast), "Most Assists", "Normal"))))
+                                  ifelse(Ast == max(Ast), "Most Assists", "Normal"))),
+         Player = iconv(Player, "LATIN1", "ASCII//TRANSLIT"),
+         Squad = iconv(Squad, "LATIN1", "ASCII//TRANSLIT"))
 
 
 big_5_combined$Player <- gsub("'", "", big_5_combined$Player)
