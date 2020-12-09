@@ -4,8 +4,57 @@ fluidPage(
     #   # gradient = "linear",
     #   # direction = "bottom"
   ),
+  
+  
+  tags$head(
+    tags$style(HTML("
+
+      .navbar {
+      
+        background-color: #4a3a3b;
+        
+      }
+      .navbar-default .navbar-nav > .active > a{
+         color: #ffffff;
+        background-color: #4a3a3b;
+      
+      }
+      .navbar-default .navbar-nav > .active > a:focus {
+        color: #ffffff;
+        background-color: #4a3a3b;
+        border-bottom: 3px solid #f0f0e4;
+      }
+      
+      .navbar-default .navbar-nav > .active > a:hover {
+        color: #ffffff;
+        background-color: #4a3a3b;
+      }
+      
+      .navbar-default .navbar-brand,
+      .navbar-default .navbar-brand:hover,
+      .navbar-default .navbar-brand:focus {
+        color: #FFF;
+      }
+      
+      .navbar-default .navbar-nav > li > a,
+      .navbar-default .navbar-nav > li > a:hover{
+        color: #FFF;
+      }
+      
+      .navbar-default .navbar-toggle .icon-bar {
+        background-color: #FFF;
+      }
+      
+      .navbar-default .navbar-toggle:hover,
+      .navbar-default .navbar-toggle:focus {
+        background-color: #4a4a3b;
+      }
+
+    "))
+  ),
+
   navbarPage(
-    "Navbar Example",
+    "Footytistics",
     fluid = TRUE,
     position = "fixed-top",
     collapsible = TRUE,
