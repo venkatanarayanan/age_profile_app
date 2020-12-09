@@ -17,12 +17,12 @@ function(input, output, session) {
   })
   
   reactive_text <- eventReactive( input$showPlot, {
-    
+
     "The above plot is called a 'Radar Plot'. The plot has three circles - minimum(inner), average(mid), maximum(outer).\nEach player is
     characterized by the metric. For example, if a player is in the outermost circle(maximum) for goals, the player can\n
     be termed as a 'Good Goalscorer'. Please note that this app is in a developmental stage and will be constantly\n
     updated to provide the best features."
-    
+
   })
   
   output$aboutNote <- renderText({ reactive_text() })
@@ -203,10 +203,11 @@ function(input, output, session) {
     
   })
   
-  observeEvent(input$reset, {
-    session$sendCustomMessage(type = 'plot_set', message = character(0))
-  })
   
+  # 
+  # output$interactivePlot <- renderGirafe({
+  #   interactivePlot()
+  # })
   
   output$datatab <- renderTable({
     out <- big_5_combined[big_5_combined$Player %in% selected_state(),]
@@ -353,74 +354,6 @@ function(input, output, session) {
 
     }
 
-    else if(input$plotOption == "Forwards Profile" && input$attributeOption == "Goal contributions") {
-      
-      data <- big_5_combined %>%
-        filter(Min >= 350) %>%
-        select(league, Player, Pos, Squad, Glsp90, Astp90, npxGp90, xAp90) %>%
-        group_by(league) %>%
-        mutate_at(vars(5:8),
-                  ~round(percent_rank(.) * 100, 2)) %>%
-        filter(Pos == "FW",
-               Squad == input$team) %>%
-        gather(key, value, -c("league", "Player", "Pos", "Squad"))
-        
-
-      ggplot(data,
-             aes(x = key,
-                 y = value,
-                 fill = Player)) +
-        geom_bar(stat = "identity",
-                 width = 1,
-                 alpha = 0.5) +
-        geom_hline(yintercept = 100,
-                   color = "navajowhite3",
-                   alpha = 1) +
-        geom_hline(yintercept = seq(0, 90, 10),
-                   color = "navajowhite3",
-                   alpha = 0.2) +
-        geom_vline(xintercept = seq(1.5,4.5, 1),
-                   color = "navajowhite3") +
-        scale_y_continuous(expand = c(0,0),
-                           breaks = seq(0,100,10)) +
-        facet_grid(~Player, space = "fixed") +
-        coord_polar(clip = "off") +
-        labs(title= "Percentile ranks in the league - 2020/21",
-             caption = "Visual by Venkat / @VenkyReddevil") +
-        theme(plot.background = element_rect(fill = "gray22",
-                                             color = "gray22"),
-              panel.background = element_rect(fill = "gray22",
-                                              color = "gray22"),
-              # panel.border = element_rect(fill = NA, color = "gray22", size = 0),
-              text = element_text(color = "ivory1", family = "Georgia", face = "bold"),
-              strip.text = element_text(color = "ivory1", family = "Georgia",
-                                        face = "bold", size = 18),
-              strip.background = element_rect(fill = "gray22"),
-              panel.grid.major.x = element_blank(),
-              panel.grid.major.y = element_blank(),
-              panel.spacing=unit(0,'npc'),
-              panel.grid.minor = element_blank(),
-              axis.title.x=element_blank(),
-              axis.title.y=element_blank(),
-              legend.position = "none",
-              legend.title = element_blank(),
-              legend.key = element_blank(),
-              axis.text.y = element_blank(),
-              axis.text.x = element_text(color = "ivory1"),
-              legend.background = element_rect(fill = "gray22"),
-              legend.text = element_text(size = 14,
-                                         family = "Georgia",
-                                         face = "bold",
-                                         color = "ivory1"),
-              plot.title = element_text(size = 20, face = "bold",
-                                        family = "Georgia", hjust = 0.5,
-                                        margin = margin(10, 0, 10,0, unit = "pt")),
-              plot.subtitle = element_text(size = 12, face = "bold.italic",
-                                           family = "Georgia", hjust = 0.5),
-              plot.caption = element_text(face = "bold.italic", family="Georgia",
-                                          size = 10, hjust = 0.5))
-
-    }
    
     
     else if(input$plotOption == "Forwards Profile" && input$attributeOption == "Goal contributions") {
@@ -522,7 +455,6 @@ function(input, output, session) {
                    color = "navajowhite3") +
         scale_y_continuous(expand = c(0,0),
                            breaks = seq(0,100,10)) +
-        # geom_label(aes(label = value, y = value + 0.005)) +
         facet_grid(~Player, space = "fixed") +
         coord_polar(clip = "off") +
         labs(title= "Percentile ranks in the league - 2020/21",
@@ -568,21 +500,33 @@ function(input, output, session) {
 
   dataTable <- eventReactive(input$showPlot,{
     
-    if (input$plotOption == "Forwards Profile" & input$attributeOption == "Goal contributions" ){
+    if (input$plotOption == "Forwards Profile" && 
+        input$attributeOption == "Goal contributions" &&
+        length(input$plotOption) > 0 &&
+        length(input$attributeOption) > 0){
       data <- big_5_combined %>%
         filter(Min >= 350,
                Pos == "FW",
                Squad == input$team) %>%
         select(Player, Glsp90, npxGp90, Astp90, xAp90)
-    } else if(input$plotOption == "Compare Forwards" & input$attributeOption == "Goal contributions") {
+      
+      datatable(data)
+    } else if(input$plotOption == "Compare Forwards" &&
+              input$attributeOption == "Goal contributions" &&
+              length(input$plotOption) > 0 &&
+              length(input$attributeOption) > 0) {
       
       data <- big_5_combined %>%
         filter(Player %in% c(input$playerOne, input$playerTwo)) %>%
         select(Player, Glsp90, npxGp90, Astp90, xAp90)
       
+      datatable(data)
+      
+    } else {
+      
     }
 
-    datatable(data)
+   
 
   })
   
