@@ -1,8 +1,6 @@
 fluidPage(
   setBackgroundColor(
     color = c("#fffff0"),
-    #   # gradient = "linear",
-    #   # direction = "bottom"
   ),
   
   
@@ -61,16 +59,20 @@ fluidPage(
     tabPanel(
       "Main",
       div(
-        style = "font-weight: bold;font-size:38px;text-align:center;margin: 50px 0 20px 0;",
+        style = "font-weight: bold;font-size:38px;
+        text-align:center;margin: 50px 0 20px 0;
+        color:#4a3a3b",
         textOutput("titleText")
       ),
       div(
-        style = "font-style: italic;font-size:18px;text-align:center;margin: 0px 0 0px 0;",
+        style = "font-style: italic;color: #4a3a3b;
+        font-size:18px;text-align:center;margin: 0px 0 0px 0;",
         textOutput("subTitleText")
       ),
       sidebarLayout(
         div(
-          style = "margin-top: 50px;",
+          style = "margin-top: 50px;color: #4a3a3b
+          font-family: Georgia",
           sidebarPanel(
             htmlOutput("plotSelector"),
             htmlOutput("leagueSelector"),
@@ -103,18 +105,22 @@ fluidPage(
                            actionButton("reset", label = "Reset selection"),
                            tableOutput("datatab")
           ),
-          plotOutput("plot"),
-          conditionalPanel(
-            condition = "input.plotOption == 'Forwards Profile' && input.attributeOption == 'Goal contributions'|| input.plotOption == 'Compare Forwards' && input.attributeOption == 'Goal contributions'",
-            DTOutput("dataTable")
+          conditionalPanel(condition = "input.plotOption != 'Attacking Contribution'",
+                           plotOutput("plot"),
           ),
-          conditionalPanel(
-            condition = "input.plotOption == 'Forwards Profile' && input.attributeOption == 'Team Leaders'",
-            div(
-              style = "font-style: italic;font-size:12px;text-align:center;margin: 10px 0 10px 0;",
-              textOutput("aboutNote")
-            )
-          )
+          # plotOutput("plot"),
+          # conditionalPanel(
+          #   condition = "input.plotOption == 'Forwards Profile' && input.attributeOption == 'Goal contributions'|| input.plotOption == 'Compare Forwards' && input.attributeOption == 'Goal contributions'",
+          #   DTOutput("dataTable")
+          # ),
+          DTOutput("dataTable")
+          # conditionalPanel(
+          #   condition = "input.plotOption == 'Forwards Profile' && input.attributeOption == 'Team Leaders'",
+          #   div(
+          #     style = "font-style: italic;font-size:12px;text-align:center;margin: 10px 0 10px 0;",
+          #     textOutput("aboutNote")
+          #   )
+          # )
         )
       ),
       div(
