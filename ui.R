@@ -6,6 +6,13 @@ fluidPage(
   
   tags$head(
     tags$style(HTML("
+      
+      
+      body {
+      
+        font-family: Tahoma, sans-serif;
+      
+      }
 
       .navbar {
       
@@ -110,6 +117,10 @@ fluidPage(
                            actionButton("reset", label = "Reset selection"),
                            tableOutput("datatab")
           ),
+          # conditionalPanel(condition = "input.plotOption == 'Squad Profile'",
+          #                  girafeOutput("ageinteractivePlot"),
+          #                  tableOutput("agedatatab")
+          # ),
           conditionalPanel(condition = "input.plotOption != 'Attacking Contribution'",
                            plotOutput("plot"),
           ),
