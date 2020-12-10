@@ -16,6 +16,24 @@ function(input, output, session) {
     I have not included the 'days' and only included 'years' while calculating the mean.\nPlease feel free to suggest anything"
   })
   
+  metricsText <- eventReactive(input$showPlot, {
+    
+    if(input$plotOption == "Forwards Profile" && 
+       input$attributeOption == "Team Leaders" &&
+       length(input$plotOption) > 0 &&
+       length(input$attributeOption) > 0) {
+    
+      "Goals p90 = Goals per 90 minutes | NP xG p90 = Non-penalty Expected Goals per 90 minutes | Asts p90 = Assists per 90 minutes | xA p90 = Expected Assists per 90 minutes"
+      
+    } else {
+      
+    }
+    
+    
+  })
+  
+  output$metricsText <- renderText({ metricsText() })
+  
   reactive_text <- eventReactive( input$showPlot, {
 
     "The above plot is called a 'Radar Plot'. The plot has three circles - minimum(inner), average(mid), maximum(outer).\nEach player is
@@ -329,15 +347,20 @@ function(input, output, session) {
               gridline.max.linetype = 1,
               gridline.mid.linetype = 1,
               axis.label.offset = 1.15,
-              gridline.min.colour = "gray22",
-              gridline.mid.colour = "gray22",
+              gridline.min.colour = "#4a3a3b",
+              gridline.mid.colour = "#4a3a3b",
+              gridline.max.colour = "#4a3a3b",
               axis.labels = c("Goals p90","NP\nxG\np90",
                               "Asts p90","xA\np90")) +
       facet_wrap(~group, ncol = 3) +
       labs(title = paste0("A comparison of the different Forwards - ", input$team),
            subtitle = "( 2020/21 - Minimum 350 minutes )",
            caption = "Visualization by Venkatanarayanan/@VenkyReddevil") +
-      theme(panel.spacing.x=unit(2, "lines"),
+      theme(plot.background = element_rect(fill = "#f0f0e4",
+                                           color = "#f0f0e4"),
+            panel.background = element_rect(fill = "#f0f0e4",
+                                            color = "#f0f0e4"),
+            panel.spacing.x=unit(2, "lines"),
             panel.spacing.y=unit(2, "lines"),
             text = element_text(color = "gray22", family = "Georgia", face = "bold"),
             strip.text = element_text(color = "gray22", family = "Georgia",
@@ -346,7 +369,8 @@ function(input, output, session) {
             strip.background = element_blank(),
             plot.title = element_text(size = 20, face = "bold",
                                       family = "Georgia", hjust = 0.5,
-                                      margin = margin(10, 0, 10,0, unit = "pt")),
+                                      margin = margin(10, 0, 10,0, unit = "pt"),
+                                      color = "#4a3a3b"),
             plot.subtitle = element_text(size = 12, face = "bold.italic",
                                          family = "Georgia", hjust = 0.5),
             plot.caption = element_text(face = "bold.italic", family="Georgia", 

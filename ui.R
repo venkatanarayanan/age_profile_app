@@ -1,6 +1,6 @@
 fluidPage(
   setBackgroundColor(
-    color = c("#fffff0"),
+    color = c("#f0f0e4"),
   ),
   
   
@@ -47,6 +47,11 @@ fluidPage(
       .navbar-default .navbar-toggle:focus {
         background-color: #4a4a3b;
       }
+      
+      #sidebar{
+        background-color: #f0f0e4;
+        border: 0.5px solid #4a3a3b;
+      }
 
     "))
   ),
@@ -73,7 +78,7 @@ fluidPage(
         div(
           style = "margin-top: 50px;color: #4a3a3b
           font-family: Georgia",
-          sidebarPanel(
+          sidebarPanel(id = "sidebar",
             htmlOutput("plotSelector"),
             htmlOutput("leagueSelector"),
             htmlOutput("teamSelector"),
@@ -108,6 +113,12 @@ fluidPage(
           conditionalPanel(condition = "input.plotOption != 'Attacking Contribution'",
                            plotOutput("plot"),
           ),
+          div(
+            textOutput("metricsText"),
+            style = "font-size: 10px;font-weight: bold;
+            color: #4a3a3b"
+          ),
+          
           # plotOutput("plot"),
           # conditionalPanel(
           #   condition = "input.plotOption == 'Forwards Profile' && input.attributeOption == 'Goal contributions'|| input.plotOption == 'Compare Forwards' && input.attributeOption == 'Goal contributions'",
