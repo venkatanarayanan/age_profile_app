@@ -215,17 +215,13 @@ function(input, output, session) {
                                stroke:black;
                                cursor:pointer",
                         reactive = TRUE),
-             opts_selection(
-               type = "multiple", css = "fill:#FF3333;stroke:black;")
+             opts_selection(type = "multiple",
+                            css = "fill:#FF3333;
+                                   stroke:black;")
            ))
     
   })
   
-  
-  # 
-  # output$interactivePlot <- renderGirafe({
-  #   interactivePlot()
-  # })
   
   output$datatab <- renderTable({
     out <- big_5_combined[big_5_combined$Player %in% selected_state(),]
@@ -238,15 +234,140 @@ function(input, output, session) {
   
   ###########
   
+  ###########
+  
+  # agePlot <- reactive({
+  #   
+  #   req(input$team)
+  #   
+  #   data = big_5_combined %>%
+  #     filter(Squad == input$team)
+  #   
+  #   ggplot(data) +
+  #     geom_point_interactive(aes(x = Age, 
+  #                    y = percent_mins,
+  #                    fill = Pos,
+  #                    data_id = Pos),
+  #                pch = 21,
+  #                size = 5) +
+  #     geom_text_repel(aes(label = Player,
+  #                         x = Age,
+  #                         y = percent_mins),
+  #                     color = "ivory1",
+  #                     size = 3,
+  #                     fontface = "bold",
+  #                     family = "Tahoma",
+  #                     box.padding = unit(0.5, "lines")) +
+  #     geom_vline(xintercept = first(subset(big_5_combined$mean_league_age,
+  #                                          big_5_combined$league == input$league)),
+  #                linetype = 2,
+  #                alpha = 0.5,
+  #                color = "ivory1") +
+  #     scale_fill_manual(values= c("#f0e442", "indianred1",
+  #                                 "#88ccee", "mediumseagreen")) +
+  #     scale_y_continuous(labels = function(x) paste0(x, "%"),
+  #                        limits = c(0,100),
+  #                        breaks = seq(0, 100, 25)) +
+  #     labs(caption = "Twitter: @VenkyReddevil",
+  #          title = paste0(input$team," | ",
+  #                         "<i style = 'color: darkorange'>Mean Squad Age = </i>", 
+  #                         "<i style = 'color: darkorange'>", 
+  #                         round(first(subset(big_5_combined$mean_squad_age,
+  #                                            big_5_combined$Squad == input$team)),
+  #                               2),
+  #                         "</i>"),
+  #          subtitle = "<span style = 'color: #88ccee'>Goalkeepers</span> ,
+  #            <span style = 'color: #f0e442'> Defenders</span> , 
+  #            <span style = 'color: mediumseagreen'> Midfielders</span> ,
+  #            <span style = 'color: indianred1'> Forwards</span> | 
+  #            The dotted line indicates the Weighted Mean League Age",
+  #          x = "Age",
+  #          y = "% of team minutes played this season (so far)") +
+  #     theme(plot.background = element_rect(fill = "gray22",
+  #                                          color = "gray22"),
+  #           panel.background = element_rect(fill = "gray22"),
+  #           plot.margin = margin(0, 0, 0, 0, "cm"),
+  #           panel.border = element_rect(fill = NA, color = "ivory1", size = 1),
+  #           text = element_text(color = "ivory1", family = "Tahoma", face = "bold"),
+  #           strip.text = element_text(color = "ivory1", family = "Tahoma",
+  #                                     face = "bold", size = 18),
+  #           strip.background = element_rect(fill = "gray22"),
+  #           panel.grid.major.x = element_blank(),
+  #           panel.grid.major.y = element_blank(),
+  #           axis.title = element_text(color = "ivory1",
+  #                                     size = 10),
+  #           panel.grid.minor = element_blank(),
+  #           legend.position = "none",
+  #           legend.title = element_blank(),
+  #           legend.key = element_blank(),
+  #           axis.text = element_text(color = "ivory1",
+  #                                    size = 10),
+  #           legend.background = element_rect(fill = "gray22"),
+  #           legend.text = element_text(size = 14,
+  #                                      family = "Tahoma",
+  #                                      face = "bold",
+  #                                      color = "ivory1"),
+  #           plot.title = element_markdown(size = 20, face = "bold",
+  #                                         family = "Tahoma",
+  #                                         margin = margin(5, 0, 5,0, unit = "pt")),
+  #           plot.subtitle = element_markdown(size = 12, face = "bold",
+  #                                            family = "Tahoma", color = "ivory1"),
+  #           plot.caption = element_text(face = "bold.italic", family="Tahoma", 
+  #                                       size = 10))
+  #   
+  # })
+  # 
+  # 
+  # selected_state <- reactive({
+  #   input$ageinteractivePlot_selected
+  # })
+  # output$console <- renderPrint({
+  #   input$ageinteractivePlot_hovered
+  # })
+  # 
+  # output$ageinteractivePlot <- renderGirafe({
+  #   
+  #   
+  #   girafe(code = print(agePlot()),
+  #          width_svg = 10, height_svg = 7,
+  #          options = list(
+  #            opts_hover(css = "stroke:black;
+  #                              cursor:pointer",
+  #                       reactive = TRUE),
+  #            opts_selection(type = "multiple",
+  #                           css = "fill:#ffffff;
+  #                                  stroke:black;
+  #                                  r: 5pt")
+  #          ))
+  #   
+  # })
+  # 
+  # 
+  # output$agedatatab <- renderTable({
+  #   
+  #   req(input$team)
+  #   
+  #   out <- big_5_combined %>%
+  #     filter(Pos %in% selected_state(),
+  #            Squad == input$team)
+  #   if( nrow(out) < 1 ) return(NULL)
+  #   row.names(out) <- NULL
+  #   out
+  # })
+  # 
+  
+  
+  ###########
+  
   plot <- eventReactive(input$showPlot, {
 
     if(input$plotOption == "Squad Profile"){
-      
+
       data = big_5_combined %>%
         filter(Squad == input$team)
-      
+
       ggplot(data) +
-        geom_point(aes(x = Age, 
+        geom_point(aes(x = Age,
                        y = percent_mins,
                        fill = Pos),
                    pch = 21,
@@ -257,7 +378,7 @@ function(input, output, session) {
                         color = "ivory1",
                         size = 3,
                         fontface = "bold",
-                        family = "Georgia",
+                        family = "Tahoma",
                         box.padding = unit(0.5, "lines")) +
         geom_vline(xintercept = first(subset(big_5_combined$mean_league_age,
                                              big_5_combined$league == input$league)),
@@ -271,16 +392,16 @@ function(input, output, session) {
                            breaks = seq(0, 100, 25)) +
         labs(caption = "Twitter: @VenkyReddevil",
              title = paste0(input$team," | ",
-                            "<i style = 'color: darkorange'>Mean Squad Age = </i>", 
-                            "<i style = 'color: darkorange'>", 
+                            "<i style = 'color: darkorange'>Mean Squad Age = </i>",
+                            "<i style = 'color: darkorange'>",
                             round(first(subset(big_5_combined$mean_squad_age,
                                                big_5_combined$Squad == input$team)),
                                   2),
                             "</i>"),
              subtitle = "<span style = 'color: #88ccee'>Goalkeepers</span> ,
-             <span style = 'color: #f0e442'> Defenders</span> , 
+             <span style = 'color: #f0e442'> Defenders</span> ,
              <span style = 'color: mediumseagreen'> Midfielders</span> ,
-             <span style = 'color: indianred1'> Forwards</span> | 
+             <span style = 'color: indianred1'> Forwards</span> |
              The dotted line indicates the Weighted Mean League Age",
              x = "Age",
              y = "% of team minutes played this season (so far)") +
@@ -289,8 +410,8 @@ function(input, output, session) {
               panel.background = element_rect(fill = "gray22"),
               plot.margin = margin(0, 0, 0, 0, "cm"),
               panel.border = element_rect(fill = NA, color = "ivory1", size = 1),
-              text = element_text(color = "ivory1", family = "Georgia", face = "bold"),
-              strip.text = element_text(color = "ivory1", family = "Georgia",
+              text = element_text(color = "ivory1", family = "Tahoma", face = "bold"),
+              strip.text = element_text(color = "ivory1", family = "Tahoma",
                                         face = "bold", size = 18),
               strip.background = element_rect(fill = "gray22"),
               panel.grid.major.x = element_blank(),
@@ -305,15 +426,15 @@ function(input, output, session) {
                                        size = 10),
               legend.background = element_rect(fill = "gray22"),
               legend.text = element_text(size = 14,
-                                         family = "Georgia",
+                                         family = "Tahoma",
                                          face = "bold",
                                          color = "ivory1"),
               plot.title = element_markdown(size = 20, face = "bold",
-                                            family = "Georgia",
+                                            family = "Tahoma",
                                             margin = margin(5, 0, 5,0, unit = "pt")),
               plot.subtitle = element_markdown(size = 12, face = "bold",
-                                               family = "Georgia", color = "ivory1"),
-              plot.caption = element_text(face = "bold.italic", family="Georgia", 
+                                               family = "Tahoma", color = "ivory1"),
+              plot.caption = element_text(face = "bold.italic", family="Tahoma",
                                           size = 10))
     }
     
@@ -331,7 +452,7 @@ function(input, output, session) {
         relocate(group, Glsp90, npxGp90)
 
       ggradar(data,
-              font.radar = "Georgia",
+              font.radar = "Tahoma",
               grid.label.size = 4,
               axis.label.size = 3,
               values.radar = c("0%", "50%","100%"),
@@ -347,9 +468,11 @@ function(input, output, session) {
               gridline.max.linetype = 1,
               gridline.mid.linetype = 1,
               axis.label.offset = 1.15,
+              group.colours = c("#dd4124", "#ed8b00", "#00496f"),
               gridline.min.colour = "#4a3a3b",
               gridline.mid.colour = "#4a3a3b",
               gridline.max.colour = "#4a3a3b",
+              grid.line.width = 0.5,
               axis.labels = c("Goals p90","NP\nxG\np90",
                               "Asts p90","xA\np90")) +
       facet_wrap(~group, ncol = 3) +
@@ -362,18 +485,18 @@ function(input, output, session) {
                                             color = "#f0f0e4"),
             panel.spacing.x=unit(2, "lines"),
             panel.spacing.y=unit(2, "lines"),
-            text = element_text(color = "gray22", family = "Georgia", face = "bold"),
-            strip.text = element_text(color = "gray22", family = "Georgia",
+            text = element_text(color = "gray22", family = "Tahoma", face = "bold"),
+            strip.text = element_text(color = "gray22", family = "Tahoma",
                                       face = "bold", size = 14),
             legend.position = "none",
             strip.background = element_blank(),
             plot.title = element_text(size = 20, face = "bold",
-                                      family = "Georgia", hjust = 0.5,
+                                      family = "Tahoma", hjust = 0.5,
                                       margin = margin(10, 0, 10,0, unit = "pt"),
                                       color = "#4a3a3b"),
             plot.subtitle = element_text(size = 12, face = "bold.italic",
-                                         family = "Georgia", hjust = 0.5),
-            plot.caption = element_text(face = "bold.italic", family="Georgia", 
+                                         family = "Tahoma", hjust = 0.5),
+            plot.caption = element_text(face = "bold.italic", family="Tahoma", 
                                         size = 10, hjust = 0.5))
 
     }
@@ -418,8 +541,8 @@ function(input, output, session) {
         theme(plot.background = element_rect(fill = "gray22"),
               panel.background = element_rect(fill = "gray22"),
               panel.border = element_rect(fill = NA, color = "gray22", size = 1),
-              text = element_text(color = "ivory1", family = "Georgia", face = "bold"),
-              strip.text = element_text(color = "ivory1", family = "Georgia",
+              text = element_text(color = "ivory1", family = "Tahoma", face = "bold"),
+              strip.text = element_text(color = "ivory1", family = "Tahoma",
                                         face = "bold", size = 18),
               strip.background = element_rect(fill = "gray22"),
               panel.grid.major.x = element_blank(),
@@ -435,15 +558,15 @@ function(input, output, session) {
               axis.text.x = element_text(color = "ivory1"),
               legend.background = element_rect(fill = "gray22"),
               legend.text = element_text(size = 14,
-                                         family = "Georgia",
+                                         family = "Tahoma",
                                          face = "bold",
                                          color = "ivory1"),
               plot.title = element_text(size = 20, face = "bold",
-                                        family = "Georgia", hjust = 0.5,
+                                        family = "Tahoma", hjust = 0.5,
                                         margin = margin(10, 0, 10,0, unit = "pt")),
               plot.subtitle = element_text(size = 12, face = "bold.italic",
-                                           family = "Georgia", hjust = 0.5),
-              plot.caption = element_text(face = "bold.italic", family="Georgia",
+                                           family = "Tahoma", hjust = 0.5),
+              plot.caption = element_text(face = "bold.italic", family="Tahoma",
                                           size = 10, hjust = 0.5))
       
     }
@@ -486,8 +609,8 @@ function(input, output, session) {
         theme(plot.background = element_rect(fill = "gray22"),
               panel.background = element_rect(fill = "gray22"),
               panel.border = element_rect(fill = NA, color = "gray22", size = 1),
-              text = element_text(color = "ivory1", family = "Georgia", face = "bold"),
-              strip.text = element_text(color = "ivory1", family = "Georgia",
+              text = element_text(color = "ivory1", family = "Tahoma", face = "bold"),
+              strip.text = element_text(color = "ivory1", family = "Tahoma",
                                         face = "bold", size = 18),
               strip.background = element_rect(fill = "gray22"),
               panel.grid.major.x = element_blank(),
@@ -503,15 +626,15 @@ function(input, output, session) {
               axis.text.x = element_text(color = "ivory1"),
               legend.background = element_rect(fill = "gray22"),
               legend.text = element_text(size = 14,
-                                         family = "Georgia",
+                                         family = "Tahoma",
                                          face = "bold",
                                          color = "ivory1"),
               plot.title = element_text(size = 20, face = "bold",
-                                        family = "Georgia", hjust = 0.5,
+                                        family = "Tahoma", hjust = 0.5,
                                         margin = margin(10, 0, 10,0, unit = "pt")),
               plot.subtitle = element_text(size = 12, face = "bold.italic",
-                                           family = "Georgia", hjust = 0.5),
-              plot.caption = element_text(face = "bold.italic", family="Georgia",
+                                           family = "Tahoma", hjust = 0.5),
+              plot.caption = element_text(face = "bold.italic", family="Tahoma",
                                           size = 10, hjust = 0.5))
       
     }
