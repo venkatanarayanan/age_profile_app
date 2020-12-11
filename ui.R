@@ -105,10 +105,12 @@ fluidPage(
                              htmlOutput("attributeSelector")
             ),
             actionButton("showPlot", label = "Show Plot"),
-            div(
-              style = "font-style: italic;font-size:12px;text-align:center;margin: 10px 0 10px 0;",
-              textOutput("sideNote")
-            ),
+            conditionalPanel(condition = "input.plotOption == 'Squad Profile'",
+              div(
+                style = "font-style: italic;font-size:12px;text-align:center;margin: 10px 0 10px 0;",
+                textOutput("sideNote")
+              ) 
+            )
           )
         ),
         mainPanel(
@@ -151,8 +153,7 @@ fluidPage(
       )
     ),
     tabPanel(
-      "About",
-      "This is the About Page"
+      "About"
     )
   )
   

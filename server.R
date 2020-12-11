@@ -408,7 +408,7 @@ function(input, output, session) {
         theme(plot.background = element_rect(fill = "gray22",
                                              color = "gray22"),
               panel.background = element_rect(fill = "gray22"),
-              plot.margin = margin(0, 0, 0, 0, "cm"),
+              # plot.margin = margin(5, 5, 5, 5, "pt"),
               panel.border = element_rect(fill = NA, color = "ivory1", size = 1),
               text = element_text(color = "ivory1", family = "Tahoma", face = "bold"),
               strip.text = element_text(color = "ivory1", family = "Tahoma",
@@ -449,32 +449,33 @@ function(input, output, session) {
         rename(group = Player) %>%
         mutate_at(vars(-group),
                   funs(rescale)) %>%
-        relocate(group, Glsp90, npxGp90)
+        relocate(group, Glsp90, npxGp90) %>%
+        rename("Goals p90" = "Glsp90",
+               "NP\nxG\np90" = "npxGp90",
+               "Asts p90" = "Astp90",
+               "xA\np90" = "xAp90")
 
-      ggradar(data,
-              font.radar = "Tahoma",
-              grid.label.size = 4,
-              axis.label.size = 3,
-              values.radar = c("0%", "50%","100%"),
-              group.point.size = 3,
-              group.line.width = 1.5,
-              background.circle.colour = "gray",
-              background.circle.transparency = 0.2,
-              legend.text.size= 10,
-              label.gridline.min = "",
-              label.gridline.mid = "",
-              label.gridline.max = "",
-              gridline.min.linetype = 1,
-              gridline.max.linetype = 1,
-              gridline.mid.linetype = 1,
-              axis.label.offset = 1.15,
-              group.colours = c("#dd4124", "#ed8b00", "#00496f"),
-              gridline.min.colour = "#4a3a3b",
-              gridline.mid.colour = "#4a3a3b",
-              gridline.max.colour = "#4a3a3b",
-              grid.line.width = 0.5,
-              axis.labels = c("Goals p90","NP\nxG\np90",
-                              "Asts p90","xA\np90")) +
+      ggradar2(data,
+               webtype = "mini",
+               grid.label.size = 4,
+               axis.label.size = 3,
+               group.point.size = 3,
+               group.line.width = 1.5,
+               background.circle.colour = "gray",
+               background.circle.transparency = 0.2,
+               legend.text.size= 10,
+               label.gridline.min = "",
+               label.gridline.mid = "",
+               label.gridline.max = "",
+               gridline.min.linetype = 1,
+               gridline.max.linetype = 1,
+               gridline.mid.linetype = 1,
+               axis.label.offset = 1.15,
+               group.colours = c("#dd4124", "#ed8b00", "#00496f"),
+               gridline.min.colour = "#4a3a3b",
+               gridline.mid.colour = "#4a3a3b",
+               gridline.max.colour = "#4a3a3b",
+               grid.line.width = 0.5) +
       facet_wrap(~group, ncol = 3) +
       labs(title = paste0("A comparison of the different Forwards - ", input$team),
            subtitle = "( 2020/21 - Minimum 350 minutes )",
@@ -657,7 +658,10 @@ function(input, output, session) {
                Squad == input$team) %>%
         select(Player, Glsp90, npxGp90, Astp90, xAp90)
       
-      datatable(data)
+      datatable(data, rownames = FALSE) %>%
+        formatStyle(c('Player', 'Glsp90', 'Astp90', 'xAp90', 'npxGp90', 'Squad'),
+                    backgroundColor = "#f0f0e4")
+      
     } else if(input$plotOption == "Compare Forwards" &&
               input$attributeOption == "Goal contributions" &&
               length(input$plotOption) > 0 &&
