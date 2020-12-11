@@ -119,6 +119,11 @@ fluidPage(
                            actionButton("reset", label = "Reset selection"),
                            tableOutput("datatab")
           ),
+          # conditionalPanel(condition = "input.plotOption == 'Age Groups Comparison'",
+          #                  girafeOutput("ageGroupInteractivePlot"),
+          #                  actionButton("reset", label = "Reset selection"),
+          #                  DTOutput("agegroupdatatab")
+          # ),
           # conditionalPanel(condition = "input.plotOption == 'Squad Profile'",
           #                  girafeOutput("ageinteractivePlot"),
           #                  tableOutput("agedatatab")

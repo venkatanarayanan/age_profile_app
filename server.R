@@ -51,7 +51,8 @@ function(input, output, session) {
     selectInput(
       inputId = "plotOption",
       label = "Select the type of viz: ",
-      choices = c("Squad Profile", "Forwards Profile", "Compare Forwards", "Attacking Contribution"),
+      choices = c("Age Groups Comparison",
+                  "Squad Profile", "Forwards Profile", "Compare Forwards", "Attacking Contribution"),
       selected = TRUE
     )
     
@@ -70,7 +71,8 @@ function(input, output, session) {
   output$teamSelector <- renderUI({
 
       
-    if(input$plotOption != "Attacking Contribution" && length(input$plotOption) > 0) {
+    if(input$plotOption != "Attacking Contribution" && length(input$plotOption) > 0 &&
+       input$plotOption != "Age Groups Comparison" && length(input$plotOption) > 0) {
       
       teamList <- subset(big_5_combined$Squad,big_5_combined$league == input$league)
       
@@ -359,9 +361,165 @@ function(input, output, session) {
   
   ###########
   
+  ##########
+
+  # ageGroupPlot <- reactive({
+  #
+  #   req(input$league)
+  #
+  #   data = big_5_combined %>%
+  #     filter(league == input$league) %>%
+  #     select(Player, Squad, Age, Min, age_group) %>%
+  #     group_by(Squad, age_group) %>%
+  #     summarise(total_mins = sum(Min)) %>%
+  #     group_by(Squad) %>%
+  #     mutate(percent_mins = round(total_mins / sum(total_mins) * 100, 2))
+  #
+  #   ggplot(data,
+  #          aes(x = age_group,
+  #              y = percent_mins,
+  #              fill = age_group)) +
+  #     geom_bar_interactive(stat = "identity") +
+  #     scale_y_continuous(limits = c(0,80),
+  #                        breaks = seq(0,80,20)) +
+  #     facet_wrap(~Squad, ncol = 5, nrow = 4) +
+  #     scale_fill_manual_interactive(
+  #       values = c("Under-23" = "darksalmon", "23-25 years" = "indianred1",
+  #                   "26-29 years" = "coral3", ">= 30 years" = "burlywood1"),
+  #       data_id = c("Under-23" =  "Under-23", "23-25 years" = "23-25 years",
+  #                   "26-29 years" = "26-29 years", ">= 30 years" = ">= 30 years")
+  #     ) +
+  #     coord_cartesian(clip = "off") +
+  #     labs(x = "",
+  #          y = "Percentage of minutes played",
+  #          title = "Premier League 2020/21 - Squad Age Profile",
+  #          subtitle = "( Percentage of minutes played by every age group ) - Players' age was recorded at the start of the season",
+  #          caption = "@VenkyReddevil") +
+  #     theme_minimal() +
+  #     theme(panel.background = element_rect(fill = "gray27"),
+  #           plot.background = element_rect(fil = "gray27"),
+  #           panel.border = element_rect(fill = NA, color =  "navajowhite3"),
+  #           panel.grid.major = element_blank(),
+  #           panel.grid.minor = element_blank(),
+  #           axis.text.x = element_blank(),
+  #           text = element_text(family = "Rockwell", color = "navajowhite2"),
+  #           strip.text = element_text(color = "navajowhite2",
+  #                                     size =14, face ="bold.italic"),
+  #           axis.text = element_text(color = "navajowhite2"),
+  #           axis.title.y = element_text(margin = margin(0,10,0,10), size = 14),
+  #           legend.title = element_blank(),
+  #           legend.position = "top",
+  #           # legend.margin = margin(20,0,0,0),
+  #           legend.text = element_text(size = 14),
+  #           plot.title = element_text(size = 20, face = "bold"),
+  #           plot.subtitle = element_text(size = 12, face = "italic"),
+  #           plot.caption = element_text(face = "italic"))
+  #
+  # })
+  #
+  #
+  # selected_keys <- reactive({
+  #   input$ageGroupInteractivePlot_key_selected
+  # })
+  #
+  # output$ageGroupInteractivePlot <- renderGirafe({
+  #
+  #
+  #   girafe(code = print(ageGroupPlot()),
+  #          width_svg = 10, height_svg = 7,
+  #          options = list(
+  #            opts_hover(css = "stroke:black;
+  #                              cursor:pointer",
+  #                       reactive = TRUE),
+  #            opts_selection(type = "single"),
+  #            opts_selection_key(css = "stroke:black;r:5pt;"),
+  #            opts_hover(css = "fill:wheat;stroke:black;stroke-width:3px;cursor:pointer;"),
+  #            opts_hover_key(css = "stroke:black;r:5pt;cursor:pointer;")
+  #          ))
+  #
+  # })
+  #
+  #
+  # output$agegroupdatatab <- renderDT({
+  #
+  #   req(input$league)
+  #
+  #   out <- big_5_combined %>%
+  #     filter(age_group %in% selected_keys(),
+  #            league == input$league) %>%
+  #     select(Squad, Player, Age, Min, Starts, MP) %>%
+  #     arrange(Squad)
+  #
+  #   if( nrow(out) < 1 ) return(NULL)
+  #   row.names(out) <- NULL
+  #
+  #   datatable(out, rownames = FALSE) %>%
+  #     formatStyle(c('Squad', 'Player', 'Age', 'Min', 'Starts', 'MP'),
+  #                 backgroundColor = '#f0f0e4')
+  #
+  # })
+
+  ##########
+
   plot <- eventReactive(input$showPlot, {
 
-    if(input$plotOption == "Squad Profile"){
+    if (input$plotOption == "Age Groups Comparison") {
+
+    data = big_5_combined %>%
+      filter(league == input$league) %>%
+      select(Player, Squad, Age, Min) %>%
+      mutate(age_group = ifelse(Age < 23, "Under-23",
+                                ifelse(Age >= 23 & Age < 26, "23-25 years",
+                                       ifelse(Age >= 26 & Age < 30, "26-29 years",
+                                              ">= 30 years")))) %>%
+      group_by(Squad, age_group) %>%
+      summarise(total_mins = sum(Min)) %>%
+      group_by(Squad) %>%
+      mutate(percent_mins = round(total_mins / sum(total_mins) * 100, 2))
+
+    data$age_group = factor(data$age_group,
+                            levels = c("Under-23", "23-25 years",
+                                       "26-29 years", ">= 30 years"))
+
+    ggplot(data,
+           aes(x = age_group,
+               y = percent_mins,
+               fill = age_group)) +
+      geom_bar(stat = "identity") +
+      scale_y_continuous(limits = c(0,80),
+                         breaks = seq(0,80,20)) +
+      facet_wrap(~Squad, ncol = 5, nrow = 4) +
+      scale_fill_manual(values = c("darksalmon", "indianred1", "coral3", "burlywood1")) +
+      coord_cartesian(clip = "off") +
+      labs(x = "",
+           y = "Percentage of minutes played",
+           title = "Premier League 2020/21 - Squad Age Profile",
+           subtitle = "( Percentage of minutes played by every age group ) - Players' age was recorded at the start of the season",
+           caption = "@VenkyReddevil") +
+      theme_minimal() +
+      theme(panel.background = element_rect(fill = "gray27"),
+            plot.background = element_rect(fil = "gray27"),
+            panel.border = element_rect(fill = NA, color =  "navajowhite3"),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            axis.text.x = element_blank(),
+            text = element_text(family = "Rockwell", color = "navajowhite2"),
+            strip.text = element_text(color = "navajowhite2",
+                                      size =14, face ="bold.italic"),
+            axis.text = element_text(color = "navajowhite2"),
+            axis.title.y = element_text(margin = margin(0,10,0,10), size = 14),
+            # panel.spacing = unit(2, "lines"),
+            legend.title = element_blank(),
+            # legend.position = "bottom",
+            legend.margin = margin(20,0,0,0),
+            legend.text = element_text(size = 14),
+            plot.title = element_text(size = 20, face = "bold"),
+            plot.subtitle = element_text(size = 12, face = "italic"),
+            plot.caption = element_text(face = "italic"))
+
+    }
+
+    else if(input$plotOption == "Squad Profile"){
 
       data = big_5_combined %>%
         filter(Squad == input$team)
