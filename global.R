@@ -38,6 +38,12 @@ big_5_combined %<>%
 
 big_5_combined$Player <- gsub("'", "", big_5_combined$Player)
 
+big_5_combined %<>%
+  mutate(age_group = ifelse(Age < 23, "Under-23",
+                            ifelse(Age >= 23 & Age < 26, "23-25 years",
+                                   ifelse(Age >= 26 & Age < 30, "26-29 years",
+                                          ">= 30 years"))))
+
 leagueNames <- as.character(unique(big_5_combined$league))
 
 
