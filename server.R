@@ -539,16 +539,18 @@ function(input, output, session) {
                         fontface = "bold",
                         family = "Tahoma",
                         box.padding = unit(0.5, "lines")) +
-        geom_vline(xintercept = first(subset(big_5_combined$mean_league_age,
-                                             big_5_combined$league == input$league)),
+        geom_vline(aes(color = "Weighted Mean League Age",
+                       xintercept = first(subset(big_5_combined$mean_league_age,
+                                                 big_5_combined$league == input$league))),
                    linetype = 2,
-                   alpha = 0.5,
-                   color = "ivory1") +
+                   alpha = 0.8) +
         scale_fill_manual(values= c("#f0e442", "indianred1",
                                     "#88ccee", "mediumseagreen")) +
         scale_y_continuous(labels = function(x) paste0(x, "%"),
                            limits = c(0,100),
                            breaks = seq(0, 100, 25)) +
+        scale_color_manual(values = c("ivory1")) +
+        guides(fill = FALSE) +
         labs(caption = "Twitter: @VenkyReddevil",
              title = paste0(input$team," | ",
                             "<i style = 'color: darkorange'>Mean Squad Age = </i>",
@@ -560,8 +562,7 @@ function(input, output, session) {
              subtitle = "<span style = 'color: #88ccee'>Goalkeepers</span> ,
              <span style = 'color: #f0e442'> Defenders</span> ,
              <span style = 'color: mediumseagreen'> Midfielders</span> ,
-             <span style = 'color: indianred1'> Forwards</span> |
-             The dotted line indicates the Weighted Mean League Age",
+             <span style = 'color: indianred1'> Forwards</span>",
              x = "Age",
              y = "% of team minutes played this season (so far)") +
         theme(plot.background = element_rect(fill = "gray22",
@@ -578,9 +579,10 @@ function(input, output, session) {
               axis.title = element_text(color = "ivory1",
                                         size = 10),
               panel.grid.minor = element_blank(),
-              legend.position = "none",
+              legend.position = "bottom",
               legend.title = element_blank(),
               legend.key = element_blank(),
+              legend.margin=margin(t = 0, unit='cm'),
               axis.text = element_text(color = "ivory1",
                                        size = 10),
               legend.background = element_rect(fill = "gray22"),
