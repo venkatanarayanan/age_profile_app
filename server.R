@@ -147,7 +147,8 @@ function(input, output, session) {
     if( input$plotOption == "Compare Forwards" && length(input$plotOption) > 0 ){
       
       data <- subset(big_5_combined$Player,
-                     big_5_combined$Squad == input$teamTwo & big_5_combined$Pos == "FW")
+                     big_5_combined$Squad == input$teamTwo & big_5_combined$Pos == "FW" &
+                       big_5_combined$Player != input$playerOne)
       
       selectInput(
         inputId = "playerTwo",
