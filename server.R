@@ -524,7 +524,7 @@ function(input, output, session) {
 
       data = big_5_combined %>%
         filter(Squad == input$team)
-
+      
       ggplot(data) +
         geom_point(aes(x = Age,
                        y = percent_mins,
@@ -544,13 +544,24 @@ function(input, output, session) {
                                                  big_5_combined$league == input$league))),
                    linetype = 2,
                    alpha = 0.8) +
-        scale_fill_manual(values= c("#f0e442", "indianred1",
-                                    "#88ccee", "mediumseagreen")) +
+        geom_rect(aes(xmin = min_years,
+                      xmax = max_years,
+                      ymin = -Inf,
+                      ymax = Inf,
+                      fill = "Age group with the max. number of players"),
+                  alpha = 0.02) +
+        guides(fill = guide_legend(override.aes = list(shape = 22,
+                                                       fill = "gray",
+                                                       size = 7))) +
+        scale_fill_manual(values= c("gray",
+                                    "#f0e442", "indianred1",
+                                    "#88ccee", "mediumseagreen"),
+                          breaks = c("Age group with the max. number of players"),
+                          labels = c("Age group with the max. number of players")) +
         scale_y_continuous(labels = function(x) paste0(x, "%"),
                            limits = c(0,100),
                            breaks = seq(0, 100, 25)) +
         scale_color_manual(values = c("ivory1")) +
-        guides(fill = FALSE) +
         labs(caption = "Twitter: @VenkyReddevil",
              title = paste0(input$team," | ",
                             "<i style = 'color: darkorange'>Mean Squad Age = </i>",
@@ -586,7 +597,7 @@ function(input, output, session) {
               axis.text = element_text(color = "ivory1",
                                        size = 10),
               legend.background = element_rect(fill = "gray22"),
-              legend.text = element_text(size = 14,
+              legend.text = element_text(size = 10,
                                          family = "Tahoma",
                                          face = "bold",
                                          color = "ivory1"),
